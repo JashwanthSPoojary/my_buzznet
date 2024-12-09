@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SESSION_KEY = exports.CALLBACK_URL = exports.GOOGLE_CLIENT_SECRET = exports.GOOGLE_CLIENT_ID = exports.PORT = exports.JWT_SECRET = void 0;
+const dotenv_1 = require("dotenv");
+(0, dotenv_1.config)();
+const JWT_SECRET = process.env.JWT_SECRET;
+exports.JWT_SECRET = JWT_SECRET;
+const PORT = process.env.PORT;
+exports.PORT = PORT;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+exports.GOOGLE_CLIENT_ID = GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+exports.GOOGLE_CLIENT_SECRET = GOOGLE_CLIENT_SECRET;
+const CALLBACK_URL = process.env.CALLBACK_URL;
+exports.CALLBACK_URL = CALLBACK_URL;
+const SESSION_KEY = process.env.SESSION_KEY;
+exports.SESSION_KEY = SESSION_KEY;

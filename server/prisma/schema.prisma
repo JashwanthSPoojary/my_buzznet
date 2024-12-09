@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id               Int                 @id @default(autoincrement())
+  username         String              @unique
+  email            String?              @unique
+  password_hash    String
+  created_at       DateTime            @default(now())
+  workspace_owner  workspaces[]
+  workspace_member workspace_members[]
+  channel_messages  channel_message[]
+  sent_messages    direct_messages[]    @relation("Send_message")
+  receive_messages direct_messages[]    @relation("Receive_message")
+}
+
+model workspaces {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  owner_id          Int
+  owner             users               @relation(fields: [owner_id], references: [id])
+  channels          channels[]
+  workspace_members workspace_members[]
+  direct_message    direct_messages[]
+}
+
+model channels {
+  id           Int               @id @default(autoincrement())
+  name         String
+  workspace_id Int
+  workspace    workspaces        @relation(fields: [workspace_id], references: [id])
+  messages     channel_message[]
+}
+
+model workspace_members {
+  id           Int        @id @default(autoincrement())
+  user_id      Int
+  workspace_id Int
+  user         users      @relation(fields: [user_id], references: [id])
+  workspace    workspaces @relation(fields: [workspace_id], references: [id])
+}
+
+model channel_message {
+  id         Int      @id @default(autoincrement())
+  channel_id Int
+  user_id    Int
+  content    String
+  user       users    @relation(fields: [user_id], references: [id])
+  channel    channels @relation(fields: [channel_id], references: [id])
+  created_at DateTime @default(now())
+}
+
+model direct_messages {
+  id           Int        @id @default(autoincrement())
+  workspace_id Int
+  sender_id    Int
+  receiver_id  Int
+  content      String
+  workspace    workspaces @relation(fields: [workspace_id], references: [id])
+  sender       users      @relation("Send_message", fields: [sender_id], references: [id])
+  receiver     users      @relation("Receive_message", fields: [receiver_id], references: [id])
+  created_at   DateTime   @default(now())
+}
