@@ -1,4 +1,2 @@
-1.tailwind css
-2. auth page
-3. modals to create channel and workspace
-4. migrate to github and files
+1. solve try catch ts error
+2. do google auth

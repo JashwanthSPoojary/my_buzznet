@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient,Prisma } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../utils/config";
 import passport from "passport";
@@ -13,8 +13,7 @@ userRouter.post("/signup", async (req, res) => {
   const validateSchema = userSchema.safeParse(req.body);
   if (!validateSchema.success) {
     res.status(400).json({
-      error_message: "failed to sign up",
-      error: validateSchema.error.errors,
+      error: validateSchema.error.errors[0].message,
     });
     return;
   }
@@ -32,18 +31,27 @@ userRouter.post("/signup", async (req, res) => {
       message: "user signed up",
     });
   } catch (error) {
-    res.status(400).json({
-      error_message: "failed to sign up",
-      error: error,
-    });
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002" &&
+      Array.isArray(error.meta?.target) && 
+      error.meta?.target?.includes("username")
+    ) {
+      res.status(409).json({
+        error: "User already exists",
+      });
+    } else {
+      res.status(500).json({
+        error:"Failed to sign up"
+      });
+    }
   }
 });
 userRouter.post("/signin", async (req, res) => {
   const validateSchema = userSchema.safeParse(req.body);
   if (!validateSchema.success) {
     res.status(400).json({
-      error_message: "failed to sign in",
-      error: validateSchema.error.errors,
+      error: validateSchema.error.errors[0].message,
     });
     return;
   }
@@ -57,7 +65,6 @@ userRouter.post("/signin", async (req, res) => {
     });
     if (response === null) {
       res.status(400).json({
-        error_message: "failed to sign in",
         error: "username is wrong",
       });
       return;
@@ -68,7 +75,6 @@ userRouter.post("/signin", async (req, res) => {
     const validPassword = await bcrypt.compare(password, password_hash);
     if (!validPassword) {
       res.status(400).json({
-        error_message: "failed to sign in",
         error: "password is wrong",
       });
       return;
@@ -87,7 +93,6 @@ userRouter.post("/signin", async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({
-      error_message: "failed to sign in",
       error: error,
     });
   }

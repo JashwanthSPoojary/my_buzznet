@@ -24,6 +24,7 @@ const userRouter = (0, express_1.Router)();
 exports.userRouter = userRouter;
 const pgClient = new client_1.PrismaClient();
 userRouter.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c;
     const validateSchema = validationSchema_1.userSchema.safeParse(req.body);
     if (!validateSchema.success) {
         res.status(400).json({
@@ -46,10 +47,20 @@ userRouter.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, funct
         });
     }
     catch (error) {
-        res.status(400).json({
-            error_message: "failed to sign up",
-            error: error,
-        });
+        if (error instanceof client_1.Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2002" &&
+            Array.isArray((_a = error.meta) === null || _a === void 0 ? void 0 : _a.target) &&
+            ((_c = (_b = error.meta) === null || _b === void 0 ? void 0 : _b.target) === null || _c === void 0 ? void 0 : _c.includes("username"))) {
+            res.status(409).json({
+                error_message: "User already exists",
+            });
+        }
+        else {
+            res.status(500).json({
+                error_message: "Failed to sign up due to an unknown error",
+                error: "Failed to sign up"
+            });
+        }
     }
 }));
 userRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {

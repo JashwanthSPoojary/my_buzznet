@@ -12,8 +12,7 @@ workspaceRouter.post("/create", auth, async (req: CustomRequest, res) => {
   const validateSchema = createModalSchema.safeParse(req.body);
   if (!validateSchema.success) {
     res.status(400).json({
-      error_message: "failed to create workspace",
-      error: validateSchema.error.errors,
+      error: validateSchema.error.errors[0].message,
     });
     return;
   }
@@ -21,7 +20,6 @@ workspaceRouter.post("/create", auth, async (req: CustomRequest, res) => {
   const user_id = req.user_id;
   if (!user_id) {
     res.status(400).json({
-      error_message: "failed to create workspace",
       error: "no user is found",
     });
     return;
@@ -38,8 +36,7 @@ workspaceRouter.post("/create", auth, async (req: CustomRequest, res) => {
     });
   } catch (error) {
     res.status(400).json({
-      error_message: "failed to create workspace database",
-      error: error,
+      error: "failed to create workspace",
     });
   }
 });

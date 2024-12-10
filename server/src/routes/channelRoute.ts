@@ -6,22 +6,18 @@ import { PrismaClient } from "@prisma/client";
 const pgClient = new PrismaClient();
 export const channelRouter = Router();
 
-
 channelRouter.post("/:workspace_id/channel/create", auth, async (req: CustomRequest, res) => {
     const validateSchema = createModalSchema.safeParse(req.body);
     if (!validateSchema.success) {
       res.status(400).json({
-        error_message: "failed to create workspace",
-        error: validateSchema.error.errors,
+        error: validateSchema.error.errors[0].message,
       });
       return;
     }
     const { name } = req.body;
-    console.log(name);
     
     const workspace_id = parseInt(req.params.workspace_id)
 
-    console.log(workspace_id);
     try {
       const workspace = await pgClient.workspaces.findUnique({
         where:{
@@ -30,7 +26,6 @@ channelRouter.post("/:workspace_id/channel/create", auth, async (req: CustomRequ
       })
       if(!workspace){
         res.status(400).json({
-            error_message: "failed to create channel",
             error: "workspace id not found",
           });
           return
@@ -46,8 +41,7 @@ channelRouter.post("/:workspace_id/channel/create", auth, async (req: CustomRequ
       });
     } catch (error) {
       res.status(400).json({
-        error_message: "failed to create channel database",
-        error: error,
+        error: "failed to create workspace",
       });
     }
   });
