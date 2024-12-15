@@ -1,29 +1,31 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { PrismaClient,Prisma } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../utils/config";
 import passport from "passport";
-import { userSchema } from "../middleware/validationSchema";
+import { signinSchema,signupSchema } from "../middleware/validationSchema";
 
 const userRouter = Router();
 const pgClient = new PrismaClient();
 
 userRouter.post("/signup", async (req, res) => {
-  const validateSchema = userSchema.safeParse(req.body);
+  const validateSchema = signupSchema.safeParse(req.body);
   if (!validateSchema.success) {
     res.status(400).json({
       error: validateSchema.error.errors[0].message,
     });
     return;
   }
-  const { username, password } = req.body;
+  const { username, email , password } = req.body;
 
   const password_hash = await bcrypt.hash(password, 5);
+
   try {
     await pgClient.users.create({
       data: {
         username: username,
+        email:email,
         password_hash: password_hash,
       },
     });
@@ -34,7 +36,7 @@ userRouter.post("/signup", async (req, res) => {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002" &&
-      Array.isArray(error.meta?.target) && 
+      Array.isArray(error.meta?.target) &&
       error.meta?.target?.includes("username")
     ) {
       res.status(409).json({
@@ -42,30 +44,31 @@ userRouter.post("/signup", async (req, res) => {
       });
     } else {
       res.status(500).json({
-        error:"Failed to sign up"
+        error: "Failed to sign up",
+        err: error,
       });
     }
   }
 });
 userRouter.post("/signin", async (req, res) => {
-  const validateSchema = userSchema.safeParse(req.body);
+  const validateSchema = signinSchema.safeParse(req.body);
   if (!validateSchema.success) {
     res.status(400).json({
       error: validateSchema.error.errors[0].message,
     });
     return;
   }
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
   try {
     const response = await pgClient.users.findUnique({
       where: {
-        username: username,
+        email: email,
       },
     });
     if (response === null) {
       res.status(400).json({
-        error: "username is wrong",
+        error: "Incorrect email",
       });
       return;
     }
@@ -75,7 +78,7 @@ userRouter.post("/signin", async (req, res) => {
     const validPassword = await bcrypt.compare(password, password_hash);
     if (!validPassword) {
       res.status(400).json({
-        error: "password is wrong",
+        error: "Incorrect password",
       });
       return;
     }
@@ -103,9 +106,15 @@ userRouter.get(
 );
 userRouter.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/" }),
+  passport.authenticate("google", { session:false,failureRedirect: "/" }),
   async (req: Request, res: Response) => {
-    res.json({ token: req.user?.token });
+    const token = req.user?.token;
+    if(!token){
+      res.redirect(`http://localhost:5173/signin`)
+    }else{
+      res.redirect(`http://localhost:5173/google/callback?token=${token}`)
+    }
+    
   }
 );
 

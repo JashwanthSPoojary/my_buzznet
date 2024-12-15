@@ -5,6 +5,7 @@ export interface AxiosErrorResponse {
 }
 const isAxios = axios.isAxiosError;
 const api = axios.create({
+    //change to env
     baseURL:"http://localhost:3000",
     headers:{
         "Content-Type":"application/json"

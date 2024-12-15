@@ -9,54 +9,50 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.channelRouter = void 0;
+exports.messageRouter = void 0;
 const express_1 = require("express");
 const auth_1 = require("../middleware/auth");
 const validationSchema_1 = require("../middleware/validationSchema");
 const client_1 = require("@prisma/client");
-const messageRoute_1 = require("./messageRoute");
 const pgClient = new client_1.PrismaClient();
-exports.channelRouter = (0, express_1.Router)();
-exports.channelRouter.post("/:workspace_id/channel/create", auth_1.auth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const validateSchema = validationSchema_1.createModalSchema.safeParse(req.body);
+exports.messageRouter = (0, express_1.Router)();
+exports.messageRouter.post("/:channel_id/message/create", auth_1.auth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const validateSchema = validationSchema_1.messageSchema.safeParse(req.body);
     if (!validateSchema.success) {
         res.status(400).json({
             error: validateSchema.error.errors[0].message,
         });
         return;
     }
-    const { name } = req.body;
-    const workspace_id = parseInt(req.params.workspace_id);
+    const user_id = req.user_id;
+    const { content } = req.body;
+    const channel_id = parseInt(req.params.channel_id);
+    if (!user_id) {
+        res.status(400).json({
+            error: "no user found",
+        });
+        return;
+    }
     try {
-        const workspace = yield pgClient.workspaces.findUnique({
-            where: {
-                id: workspace_id
+        const response = yield pgClient.channel_message.create({
+            data: {
+                content: content,
+                channel_id: channel_id,
+                user_id: user_id
             }
         });
-        if (!workspace) {
-            res.status(400).json({
-                error: "workspace id not found",
-            });
-            return;
-        }
-        const response = yield pgClient.channels.create({
-            data: {
-                name: name,
-                workspace_id: workspace_id,
-            },
-        });
         res.status(201).json({
-            message: "channel created",
+            message: "message created",
             data: response
         });
     }
     catch (error) {
         res.status(400).json({
-            error: "failed to create workspace",
+            error: "failed to create message",
         });
     }
 }));
-exports.channelRouter.get("/:workspace_id/channel/getchannels", auth_1.auth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.messageRouter.get("/:channel_id/getmessages", auth_1.auth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user_id = req.user_id;
     if (!user_id) {
         res.status(400).json({
@@ -64,22 +60,21 @@ exports.channelRouter.get("/:workspace_id/channel/getchannels", auth_1.auth, (re
         });
         return;
     }
-    const workspace_id = parseInt(req.params.workspace_id);
+    const channel_id = parseInt(req.params.channel_id);
     try {
-        const response = yield pgClient.channels.findMany({
+        const response = yield pgClient.channel_message.findMany({
             where: {
-                workspace_id: workspace_id,
+                channel_id: channel_id,
             },
         });
         res.status(201).json({
-            message: "channels fetched",
+            message: "messages fetched",
             data: response,
         });
     }
     catch (error) {
         res.status(400).json({
-            error: "failed to fetch channels",
+            error: "failed to fetch messages",
         });
     }
 }));
-exports.channelRouter.use("/:workspace_id/channel/", messageRoute_1.messageRouter);

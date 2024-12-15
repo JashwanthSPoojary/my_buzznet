@@ -1,21 +1,36 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createModalSchema = exports.userSchema = void 0;
+exports.messageSchema = exports.createModalSchema = exports.signinSchema = exports.signupSchema = void 0;
 const zod_1 = require("zod");
-const userSchema = zod_1.z.object({
+const signupSchema = zod_1.z.object({
     username: zod_1.z.string()
-        .min(3, { message: 'Username must be at least 3 characters long' })
-        .max(20, { message: 'Username must be less than 20 characters' })
-        .regex(/^[a-zA-Z0-9_]+$/, { message: 'Username can only contain letters, numbers, and underscores' }),
+        .min(3, { message: 'Username must be 3-20 characters' })
+        .max(20)
+        .regex(/^[a-zA-Z0-9_]+$/, { message: 'Only letters, numbers, underscores' }),
+    email: zod_1.z.string().email({ message: 'Invalid email address' }),
     password: zod_1.z.string()
-        .min(6, { message: 'Password must be at least 6 characters long' })
-        .max(20, { message: 'Password must be less than 20 characters' })
-        .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-        .regex(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
-        .regex(/[0-9]/, { message: 'Password must contain at least one number' }),
+        .min(6, { message: 'Password must be 6-20 characters' })
+        .max(20)
+        .regex(/[A-Z]/, { message: 'At least one uppercase letter' })
+        .regex(/[a-z]/, { message: 'At least one lowercase letter' })
+        .regex(/[0-9]/, { message: 'At least one number' }),
 });
-exports.userSchema = userSchema;
+exports.signupSchema = signupSchema;
+const signinSchema = zod_1.z.object({
+    email: zod_1.z.string().email({ message: 'Invalid email address' }),
+    password: zod_1.z.string()
+        .min(6, { message: 'Password must be 6-20 characters' })
+        .max(20)
+        .regex(/[A-Z]/, { message: 'At least one uppercase letter' })
+        .regex(/[a-z]/, { message: 'At least one lowercase letter' })
+        .regex(/[0-9]/, { message: 'At least one number' }),
+});
+exports.signinSchema = signinSchema;
 const createModalSchema = zod_1.z.object({
     name: zod_1.z.string().min(3).max(50),
 });
 exports.createModalSchema = createModalSchema;
+const messageSchema = zod_1.z.object({
+    content: zod_1.z.string().min(1).max(1000),
+});
+exports.messageSchema = messageSchema;

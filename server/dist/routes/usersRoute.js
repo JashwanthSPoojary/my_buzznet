@@ -25,20 +25,20 @@ exports.userRouter = userRouter;
 const pgClient = new client_1.PrismaClient();
 userRouter.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
-    const validateSchema = validationSchema_1.userSchema.safeParse(req.body);
+    const validateSchema = validationSchema_1.signupSchema.safeParse(req.body);
     if (!validateSchema.success) {
         res.status(400).json({
-            error_message: "failed to sign up",
-            error: validateSchema.error.errors,
+            error: validateSchema.error.errors[0].message,
         });
         return;
     }
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
     const password_hash = yield bcrypt_1.default.hash(password, 5);
     try {
         yield pgClient.users.create({
             data: {
                 username: username,
+                email: email,
                 password_hash: password_hash,
             },
         });
@@ -52,37 +52,35 @@ userRouter.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, funct
             Array.isArray((_a = error.meta) === null || _a === void 0 ? void 0 : _a.target) &&
             ((_c = (_b = error.meta) === null || _b === void 0 ? void 0 : _b.target) === null || _c === void 0 ? void 0 : _c.includes("username"))) {
             res.status(409).json({
-                error_message: "User already exists",
+                error: "User already exists",
             });
         }
         else {
             res.status(500).json({
-                error_message: "Failed to sign up due to an unknown error",
-                error: "Failed to sign up"
+                error: "Failed to sign up",
+                err: error,
             });
         }
     }
 }));
 userRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const validateSchema = validationSchema_1.userSchema.safeParse(req.body);
+    const validateSchema = validationSchema_1.signinSchema.safeParse(req.body);
     if (!validateSchema.success) {
         res.status(400).json({
-            error_message: "failed to sign in",
-            error: validateSchema.error.errors,
+            error: validateSchema.error.errors[0].message,
         });
         return;
     }
-    const { username, password } = req.body;
+    const { email, password } = req.body;
     try {
         const response = yield pgClient.users.findUnique({
             where: {
-                username: username,
+                email: email,
             },
         });
         if (response === null) {
             res.status(400).json({
-                error_message: "failed to sign in",
-                error: "username is wrong",
+                error: "Incorrect email",
             });
             return;
         }
@@ -93,8 +91,7 @@ userRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, funct
         const validPassword = yield bcrypt_1.default.compare(password, password_hash);
         if (!validPassword) {
             res.status(400).json({
-                error_message: "failed to sign in",
-                error: "password is wrong",
+                error: "Incorrect password",
             });
             return;
         }
@@ -110,13 +107,18 @@ userRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
     catch (error) {
         res.status(400).json({
-            error_message: "failed to sign in",
             error: error,
         });
     }
 }));
 userRouter.get("/google", passport_1.default.authenticate("google", { scope: ["profile", "email"] }));
-userRouter.get("/google/callback", passport_1.default.authenticate("google", { failureRedirect: "/" }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+userRouter.get("/google/callback", passport_1.default.authenticate("google", { session: false, failureRedirect: "/" }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    res.json({ token: (_a = req.user) === null || _a === void 0 ? void 0 : _a.token });
+    const token = (_a = req.user) === null || _a === void 0 ? void 0 : _a.token;
+    if (!token) {
+        res.redirect(`http://localhost:5173/signin`);
+    }
+    else {
+        res.redirect(`http://localhost:5173/google/callback?token=${token}`);
+    }
 }));
