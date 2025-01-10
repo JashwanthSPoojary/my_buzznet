@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../utils/config";
 import passport from "passport";
 import { signinSchema,signupSchema } from "../middleware/validationSchema";
+import { auth,CustomRequest } from "../middleware/auth";
 
 const userRouter = Router();
 const pgClient = new PrismaClient();
@@ -117,5 +118,91 @@ userRouter.get(
     
   }
 );
+userRouter.get('/userdetails',auth, async (req:CustomRequest,res)=>{
+  const userId = req.user_id;
+  
+  try {
+    const response = await pgClient.users.findFirst({
+      where:{
+        id:userId
+    }
+    })
+    res.status(201).json({
+      message:"user datails fetched",
+      data:response
+    });
+  } catch (error) {
+    res.status(400).json({
+      message:"error of userdetails",
+    });
+    console.log("userdetails : "+error);
+  }
+})
+userRouter.get('/invite/:token',auth,async (req:CustomRequest,res)=>{
+  const { token } = req.params;
+  const userId = req.user_id;
+  if(!userId){
+    res.status(201).json({
+      error:"no user found"
+    })
+    return
+  }
+  try {
+    const invite = await pgClient.workspace_invitation_links.findUnique({
+      where:{
+        token:token
+      }
+    })
+    if (!invite){
+      res.status(201).json({ error: 'Invalid invite token.' });
+      return 
+    } 
+    const workspace = await pgClient.workspaces.findUnique({ where: { id: invite.workspace_id }});
+    const user = await pgClient.users.findUnique({ where: { id: userId } });
+    if (!workspace || !user){
+      res.status(201).json({ error: 'Invalid workspace or user.' });
+      return 
+    }
+    const isMember = await pgClient.workspace_members.findFirst({
+      where: { workspace_id: workspace.id, user_id: user.id },
+    });
+    if (isMember){
+      res.status(201).json({ error: 'You are already a member of this workspace.' });
+      return 
+    } 
+    res.json({ message:"invite is valid",data:workspace.name });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+userRouter.post('/invite/:token/accept',auth,async (req:CustomRequest,res)=>{
+  const { token } = req.params;
+  const userId = req.user_id;
+  if(!userId){
+    res.status(400).json({ error: 'no user found' });
+    return
+  }
+  try {
+    const invite = await pgClient.workspace_invitation_links.findUnique({ where: { token:token } });
+    if (!invite){
+      res.status(201).json({ error: 'Invalid invite token.' });
+      return 
+    } 
+    const isMember = await pgClient.workspace_members.findFirst({
+      where: { workspace_id: invite.workspace_id, user_id: userId },
+    });
+    if (isMember){
+      res.status(201).json({ error: 'You are already a member of this workspace.' });
+      return 
+    } 
+    await pgClient.workspace_members.create({
+      data: { workspace_id: invite.workspace_id, user_id: userId },
+    });
+    res.json({ message: 'Successfully joined the workspace.' });
+  } catch (error) {
+    console.log("error");
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
 
 export { userRouter };

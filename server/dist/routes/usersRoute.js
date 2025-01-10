@@ -20,6 +20,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = require("../utils/config");
 const passport_1 = __importDefault(require("passport"));
 const validationSchema_1 = require("../middleware/validationSchema");
+const auth_1 = require("../middleware/auth");
 const userRouter = (0, express_1.Router)();
 exports.userRouter = userRouter;
 const pgClient = new client_1.PrismaClient();
@@ -120,5 +121,93 @@ userRouter.get("/google/callback", passport_1.default.authenticate("google", { s
     }
     else {
         res.redirect(`http://localhost:5173/google/callback?token=${token}`);
+    }
+}));
+userRouter.get('/userdetails', auth_1.auth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req.user_id;
+    try {
+        const response = yield pgClient.users.findFirst({
+            where: {
+                id: userId
+            }
+        });
+        res.status(201).json({
+            message: "user datails fetched",
+            data: response
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            message: "error of userdetails",
+        });
+        console.log("userdetails : " + error);
+    }
+}));
+userRouter.get('/invite/:token', auth_1.auth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { token } = req.params;
+    const userId = req.user_id;
+    if (!userId) {
+        res.status(201).json({
+            error: "no user found"
+        });
+        return;
+    }
+    try {
+        const invite = yield pgClient.workspace_invitation_links.findUnique({
+            where: {
+                token: token
+            }
+        });
+        if (!invite) {
+            res.status(201).json({ error: 'Invalid invite token.' });
+            return;
+        }
+        const workspace = yield pgClient.workspaces.findUnique({ where: { id: invite.workspace_id } });
+        const user = yield pgClient.users.findUnique({ where: { id: userId } });
+        if (!workspace || !user) {
+            res.status(201).json({ error: 'Invalid workspace or user.' });
+            return;
+        }
+        const isMember = yield pgClient.workspace_members.findFirst({
+            where: { workspace_id: workspace.id, user_id: user.id },
+        });
+        if (isMember) {
+            res.status(201).json({ error: 'You are already a member of this workspace.' });
+            return;
+        }
+        res.json({ message: "invite is valid", data: workspace.name });
+    }
+    catch (error) {
+        res.status(500).json({ error: 'Server error.' });
+    }
+}));
+userRouter.post('/invite/:token/accept', auth_1.auth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { token } = req.params;
+    const userId = req.user_id;
+    if (!userId) {
+        res.status(400).json({ error: 'no user found' });
+        return;
+    }
+    try {
+        const invite = yield pgClient.workspace_invitation_links.findUnique({ where: { token: token } });
+        if (!invite) {
+            res.status(201).json({ error: 'Invalid invite token.' });
+            return;
+        }
+        const isMember = yield pgClient.workspace_members.findFirst({
+            where: { workspace_id: invite.workspace_id, user_id: userId },
+        });
+        if (isMember) {
+            res.status(201).json({ error: 'You are already a member of this workspace.' });
+            return;
+        }
+        yield pgClient.workspace_members.create({
+            data: { workspace_id: invite.workspace_id, user_id: userId },
+        });
+        res.json({ message: 'Successfully joined the workspace.' });
+    }
+    catch (error) {
+        console.log("error");
+        res.status(500).json({ error: 'Server error.' });
     }
 }));

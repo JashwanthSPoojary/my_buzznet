@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { api, isAxios, AxiosErrorResponse } from "../../util/api";
 import { useNavigate, Link } from "react-router-dom";
+import { FcGoogle } from "react-icons/fc";
+
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -39,40 +41,54 @@ const SignIn = () => {
     window.location.href = "http://localhost:3000/user/google";
   };
   return (
-    <div className="w-screen h-screen flex justify-center items-center flex-row">
-      <div className="flex gap-4 flex-col justify-center items-center">
-        <h1 className="font-semibold text-xl">Sign In</h1>
-        {error === "" ? null : <span>{error}</span>}
-        <form method="post" onSubmit={onSubmit}>
-          <div className="flex flex-col gap-4 justify-center items-center">
+    <div className="min-h-screen w-full flex justify-center items-center bg-[#36393f] p-4">
+      <div className="w-full max-w-md p-4 sm:p-6 md:p-8 rounded-lg bg-[#2f3136] text-white shadow-lg">
+        <h1 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Welcome back!</h1>
+        {error && <span className="text-[#f04747] text-sm mb-4 block text-center">{error}</span>}
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-xs font-medium text-[#b9bbbe] uppercase mb-2">Email</label>
             <input
-              onChange={(e) => setEmail(e.target.value)}
-              className="border border-black px-5 py-1"
+              id="email"
               type="email"
-              placeholder="youremail@gmail.com"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 rounded bg-[#202225] border-none text-white placeholder-[#72767d] focus:outline-none focus:ring-2 focus:ring-[#5865f2]"
             />
-            <input
-              onChange={(e) => setPassword(e.target.value)}
-              className="border border-black px-5 py-1"
-              type="password"
-              placeholder="password"
-            />
-            <button className="border bg-black text-white rounded-lg px-6 py-2">
-              Sign In
-            </button>
           </div>
+          <div>
+            <label htmlFor="password" className="block text-xs font-medium text-[#b9bbbe] uppercase mb-2">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 rounded bg-[#202225] border-none text-white placeholder-[#72767d] focus:outline-none focus:ring-2 focus:ring-[#5865f2]"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-customGreen hover:bg-green-800 text-white py-2 px-4 rounded transition-colors duration-200"
+          >
+            Sign In
+          </button>
         </form>
-        <p> or </p>
+        <div className="mt-4 text-center text-sm text-[#b9bbbe]">
+          <span>Or</span>
+        </div>
         <button
           onClick={handleGoogleLogin}
-          className="border border-black px-5 py-1"
+          className="w-full mt-4 bg-transparent border border-[#4f545c] text-white hover:bg-[#4f545c] py-2 px-4 rounded flex items-center justify-center transition-colors duration-200"
         >
-          Google
+          <FcGoogle className="w-5 h-5 mr-2" />
+          Continue with Google
         </button>
-        <p>
-          Don't have account ?{" "}
-          <Link to="/signup">
-            <span className="text-blue-600 cursor-pointer">Signup here</span>
+        <p className="mt-6 text-center text-xs sm:text-sm text-[#b9bbbe]">
+          Need an account?{' '}
+          <Link to="/signup" className="text-customGreen hover:underline">
+            Sign Up
           </Link>
         </p>
       </div>

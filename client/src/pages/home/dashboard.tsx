@@ -1,106 +1,123 @@
+import Navbar from "../../components/navbar";
+import ServerSidebar from "../../components/server-sidebar";
+import ChannelSidebar from "../../components/channel-sidebar";
+import WorkspaceModal from "../../components/workspace-modal";
+import ChannelModal from "../../components/channel-modal";
+import ChannelMessages from "../../components/channel-messages";
+import { useFetchWorkspaces } from "../../hooks/useFetchWorkspaces";
 import { useEffect, useState } from "react";
-import Sidebar from "../../components/sidebar";
-import WorkspaceModal from "../../components/workspacemodal";
-import { api } from "../../util/api";
-import { token } from "../../util/authenticated";
-import Channelsidebar from "../../components/channelsidebar";
-import Channelmodal from "../../components/channelmodal";
-import Channelmessages from "../../components/channelmessage";
-
-interface Channel {
-    id: number;
-    name: string;
-}
-interface Workspace {
-    id: number;
-    name: string;
-}
-interface ActiveWorkspaceData{
-    channels:[],
-    id:number,
-    name:string,
-    owner_id:number,
-    workspace_members:[]
-}
+import Logout from "../../components/logout";
+import InviteModal from "../../components/invite-modal";
+import ChannelActionModal from "../../components/channel-action-modal";
+import WorkspaceActionModal from "../../components/workspace-action-modal";
+import ChatbotSection from "../../components/chatbot-section";
+import { Route, Routes, useMatch, useParams } from "react-router-dom";
+import { UseWorkspaceContext } from "../../context/workspaceContext";
+import DirectMessages from "../../components/direct-messages";
+import { useFetchUser } from "../../hooks/useFetchUser";
+import { useFetchChannels } from "../../hooks/useFetchChannel";
+import { UseChannelContext } from "../../context/channelContext";
+import { useFetchMembers } from "../../hooks/useFetchMember";
 
 const Dashboard = () => {
-    const [workspaces,setWorkspaces] = useState<Workspace[]>([])
-    const [channels,setChannels] = useState<Channel[]>([])
-    const [open,setOpen] = useState(false);
-    const [openChannelModal,setOpenChannelModal] = useState(false);
-    const [selectedWorkspace,setSeletedWorkspace] = useState<number | null>(null);
-    const [selectedChannel,setSeletedChannel] = useState<number | null>(null);
-    const [activeWorkspaceData, setActiveWorkspaceData] = useState<ActiveWorkspaceData | null>(null);
-    
-    
-    const addworkspacelist = (workspace:Workspace) =>{
-        setWorkspaces((prev)=>[...prev,workspace])
-    }
-    const addchannellist = (channel:Channel) =>{
-        setChannels((prev)=>[...prev,channel])
-    }
-    useEffect(()=>{
-        const fetchWorkspaces = async () =>{
-            try {
-                const response = await api.get('/workspace/getworkspaces',{headers:{token:token}});
-                setWorkspaces(response.data.data)      
-                if(response.data.data.length>0 && !selectedWorkspace){
-                    const firstworkspace = response.data.data[0].id;
-                    setSeletedWorkspace(firstworkspace);
-                }
-            } catch (error) {
-              // change this
-                console.log(error);
-                
-            }
-        }
-        fetchWorkspaces();
-    },[]);
+  useFetchUser();
+  useFetchWorkspaces();
+  useFetchChannels();
+  useFetchMembers();
 
-    useEffect(()=>{
-        if (!selectedWorkspace) return;
-        const fetchWorkspaceData = async () => {
-            try {
-              const response = await api.get(`/workspace/${selectedWorkspace}`,{headers:{token:token}});
-              setActiveWorkspaceData(response.data.data);                                          
-            } catch (error) {
-                //change this
-              console.error("Error fetching active workspace data:", error);
-            }
-          };
-      
-          fetchWorkspaceData();
-        },[selectedWorkspace]);
+  const match = useMatch('/workspaces/:workspaceId/channels/:channelId');
+  const { workspaceId  } = useParams(); 
+  const channelId = match?.params.channelId;
 
+  const { setSeletedWorkspace } = UseWorkspaceContext();
+  const { selectedChannel,setSeletedChannel } = UseChannelContext();
 
-    useEffect(()=>{        
-        if(!activeWorkspaceData) return
-        const fetchChannels = async () =>{            
-            try {
-                const response = await api.get(`/workspace/${activeWorkspaceData?.id}/channel/getchannels`,{headers:{token:token}});
-                setChannels(response.data.data)
-                if(response.data.data.length>0 && !selectedChannel){
-                    const firstChannel = response.data.data[0].id;
-                    setSeletedChannel(firstChannel);
-                }
-            } catch (error) {
-              // change this
-                console.log(error);
-                
-            }
-        }
-        fetchChannels();
-    },[activeWorkspaceData]);
-    
-    return ( 
-        <div className="w-screen h-screen flex">
-            <WorkspaceModal open={open} setopen={setOpen} onWorkspaceAdd={addworkspacelist}/>
-            <Channelmodal workspaceid={activeWorkspaceData?.id} open={openChannelModal} setopen={setOpenChannelModal} onChannelAdd={addchannellist}/>
-            <Sidebar setopen={setOpen} workspaces={workspaces} selectedWorkspace={selectedWorkspace} setSeletedWorkspace={setSeletedWorkspace}/>
-            <Channelsidebar selectedChannel={selectedChannel} setSeletedChannel={setSeletedChannel} channels={channels} setopen={setOpenChannelModal}/>
-            <Channelmessages  workspaceid={selectedWorkspace} channelid={selectedChannel}/>
+  const [sidebarToggle, setSidebartoggle] = useState<boolean>(false);
+  const [workspaceModalToggle, setworkspaceModalToggle] =
+    useState<boolean>(false);
+  const [channelModalToggle, setchannelModalToggle] = useState<boolean>(false);
+  const [logoutToggle, setLogoutToggle] = useState<boolean>(false);
+  const [inviteToggle, setInviteToggle] = useState<boolean>(false);
+  const [channelActionToggle, setChannelActionToggle] =
+    useState<boolean>(false);
+  const [workspaceActionToggle, setWorkspaceActionToggle] =
+    useState<boolean>(false);
+  const [selectChatbot, setSelectChatbot] = useState<boolean>(false);
+  const [actionModalId, setActionModalId] = useState<number | null>(null);
+  const [voicechannelModalToggle, setvoicechannelModalToggle] =
+    useState<boolean>(false);
+  useEffect(()=>{
+      if(workspaceId){
+        setSeletedWorkspace(parseInt(workspaceId));
+      }      
+      if(channelId){
+        setSeletedChannel(parseInt(channelId))
+      }      
+    },[workspaceId,selectedChannel,channelId,setSeletedChannel,setSeletedWorkspace]);
+
+  return (
+    <div className="w-screen h-screen flex flex-col overflow-hidden">
+      {/* Modals */}
+      <Logout logoutToggle={logoutToggle} setLogoutToggle={setLogoutToggle} />
+      <ChannelModal
+        channelModalToggle={channelModalToggle}
+        setchannelModalToggle={setchannelModalToggle}
+      />
+      <WorkspaceModal
+        workspaceModalToggle={workspaceModalToggle}
+        setworkspaceModalToggle={setworkspaceModalToggle}
+      />
+      <InviteModal
+        inviteToggle={inviteToggle}
+        setInviteToggle={setInviteToggle}
+      />
+      <ChannelActionModal
+        channelActionToggle={channelActionToggle}
+        setChannelActionToggle={setChannelActionToggle}
+        actionModalId={actionModalId}
+      />
+      <WorkspaceActionModal
+        workspaceActionToggle={workspaceActionToggle}
+        setWorkspaceActionToggle={setWorkspaceActionToggle}
+      />
+
+      <Navbar
+        sidebarToggle={sidebarToggle}
+        setSidebartoggle={setSidebartoggle}
+        selectChatbot={selectChatbot}
+        setSelectChatbot={setSelectChatbot}
+      />
+        <div className="flex flex-1 overflow-hidden">
+          {sidebarToggle && !selectChatbot && (
+            <>
+              <ServerSidebar
+                workspaceModalToggle={workspaceModalToggle}
+                setworkspaceModalToggle={setworkspaceModalToggle}
+              />
+              <ChannelSidebar
+                key={workspaceId}
+                channelModalToggle={channelModalToggle}
+                setchannelModalToggle={setchannelModalToggle}
+                logoutToggle={logoutToggle}
+                setLogoutToggle={setLogoutToggle}
+                inviteToggle={inviteToggle}
+                setInviteToggle={setInviteToggle}
+                setChannelActionToggle={setChannelActionToggle}
+                setActionModalId={setActionModalId}
+                setWorkspaceActionToggle={setWorkspaceActionToggle}
+                voicechannelModalToggle={voicechannelModalToggle}
+                setvoicechannelModalToggle={setvoicechannelModalToggle}
+              />
+            </>
+          )}
+          <Routes>
+            <Route path="chatbot" element={<ChatbotSection setChatbot={setSelectChatbot}/>}/>
+            <Route path="channels/:channelId" element={<ChannelMessages sidebarToggle={sidebarToggle}/>}/>
+            <Route path="dms/:dmId" element={<DirectMessages sidebarToggle={sidebarToggle}/>}/>
+          </Routes>
         </div>
-     );
-}
- 
+    </div>
+  );
+};
+
 export default Dashboard;

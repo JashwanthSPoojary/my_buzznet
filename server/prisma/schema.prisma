@@ -10,31 +10,34 @@ datasource db {
 model users {
   id               Int                 @id @default(autoincrement())
   username         String              @unique
-  email            String?              @unique
+  email            String?             @unique
   password_hash    String
   created_at       DateTime            @default(now())
   workspace_owner  workspaces[]
+  channel_messages channel_message[]
   workspace_member workspace_members[]
-  channel_messages  channel_message[]
-  sent_messages    direct_messages[]    @relation("Send_message")
-  receive_messages direct_messages[]    @relation("Receive_message")
+  ChatbotMessage ChatbotMessage[]
+  voicechannels VoiceChannel[] @relation("VoiceChannelMembers")
+  sent_messages    direct_messages[]   @relation("Send_message")
+  receive_messages direct_messages[]   @relation("Receive_message")
 }
 
 model workspaces {
-  id                Int                 @id @default(autoincrement())
-  name              String
-  owner_id          Int
-  owner             users               @relation(fields: [owner_id], references: [id])
-  channels          channels[]
-  workspace_members workspace_members[]
-  direct_message    direct_messages[]
+  id                         Int                          @id @default(autoincrement())
+  name                       String
+  owner_id                   Int
+  owner                      users                        @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  channels                   channels[]
+  workspace_members          workspace_members[]
+  direct_message             direct_messages[]
+  workspace_invitation_links workspace_invitation_links[]
 }
 
 model channels {
   id           Int               @id @default(autoincrement())
   name         String
   workspace_id Int
-  workspace    workspaces        @relation(fields: [workspace_id], references: [id])
+  workspace    workspaces        @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
   messages     channel_message[]
 }
 
@@ -42,17 +45,18 @@ model workspace_members {
   id           Int        @id @default(autoincrement())
   user_id      Int
   workspace_id Int
-  user         users      @relation(fields: [user_id], references: [id])
-  workspace    workspaces @relation(fields: [workspace_id], references: [id])
+  user         users      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  workspace    workspaces @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
 }
 
 model channel_message {
   id         Int      @id @default(autoincrement())
   channel_id Int
-  user_id    Int
-  content    String
-  user       users    @relation(fields: [user_id], references: [id])
-  channel    channels @relation(fields: [channel_id], references: [id])
+  sender_id  Int?
+  sender     users?   @relation(fields: [sender_id], references: [id], onDelete: Cascade)
+  content    String?
+  file_url   String?
+  channel    channels @relation(fields: [channel_id], references: [id], onDelete: Cascade)
   created_at DateTime @default(now())
 }
 
@@ -61,9 +65,38 @@ model direct_messages {
   workspace_id Int
   sender_id    Int
   receiver_id  Int
-  content      String
-  workspace    workspaces @relation(fields: [workspace_id], references: [id])
-  sender       users      @relation("Send_message", fields: [sender_id], references: [id])
-  receiver     users      @relation("Receive_message", fields: [receiver_id], references: [id])
+  content      String?
+  file_url     String?
+  workspace    workspaces @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  sender       users      @relation("Send_message", fields: [sender_id], references: [id], onDelete: Cascade)
+  receiver     users      @relation("Receive_message", fields: [receiver_id], references: [id], onDelete: Cascade)
   created_at   DateTime   @default(now())
+}
+
+model workspace_invitation_links {
+  id           Int        @id @default(autoincrement())
+  workspace_id Int
+  token        String     @unique
+  is_accepted  Boolean    @default(false)
+  created_at   DateTime   @default(now())
+  expiresAt    DateTime?
+  created_by   Int
+  workspace    workspaces @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+}
+model ChatbotMessage {
+  id          String   @id @default(uuid()) // Unique identifier for each message
+  content     String   // The text of the message
+  author      String   // Can be 'user' or 'chatbot'
+  createdAt   DateTime @default(now()) // Timestamp of the message creation
+  userId      Int   // ID of the user who initiated the conversation
+  user        users     @relation(fields: [userId], references: [id]) // Relation to User model
+}
+model VoiceChannel {
+  id            Int      @id @default(autoincrement())
+  name          String   // e.g., "Movie Discussion"
+  workspaceId   Int      // Reference to the workspace
+  creatorId     Int      // User who created the channel
+  members       users[]   @relation("VoiceChannelMembers")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
