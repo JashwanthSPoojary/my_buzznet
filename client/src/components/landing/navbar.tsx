@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaBars, FaTimes } from 'react-icons/fa';
+import { Link } from "react-router-dom";
 
 
 const Navbar = () => {
@@ -29,12 +30,12 @@ const Navbar = () => {
           Buzz<span className="text-white">Net</span>
         </a>
         <div className="hidden md:flex space-x-4">
-          <button className="px-6 py-2 text-[#5CB338] border-2 border-[#5CB338] rounded-full font-semibold hover:bg-[#5CB338] hover:text-[#000000] transition-all duration-300 transform hover:scale-105">
+          <Link to='/signin' className="px-6 py-2 text-[#5CB338] border-2 border-[#5CB338] rounded-full font-semibold hover:bg-[#5CB338] hover:text-[#000000] transition-all duration-300 transform hover:scale-105">
             Sign In
-          </button>
-          <button className="px-6 py-2 bg-[#5CB338] text-[#000000] border-2 border-[#5CB338] rounded-full font-semibold hover:bg-transparent hover:text-[#5CB338] transition-all duration-300 transform hover:scale-105">
+          </Link>
+          <Link to='/signup' className="px-6 py-2 bg-[#5CB338] text-[#000000] border-2 border-[#5CB338] rounded-full font-semibold hover:bg-transparent hover:text-[#5CB338] transition-all duration-300 transform hover:scale-105">
             Sign Up
-          </button>
+          </Link>
         </div>
         <button
           className="md:hidden text-[#5CB338] focus:outline-none"

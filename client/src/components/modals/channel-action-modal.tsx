@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { UseChannelContext } from "../context/channelContext";
-import { api } from "../util/api";
-import { UseWorkspaceContext } from "../context/workspaceContext";
-import { token } from "../util/authenticated";
+import { UseChannelContext } from "../../context/channelContext";
+import { api } from "../../util/api";
+import { UseWorkspaceContext } from "../../context/workspaceContext";
+import { token } from "../../util/authenticated";
 
 interface ActionModalProps {
     channelActionToggle:boolean;

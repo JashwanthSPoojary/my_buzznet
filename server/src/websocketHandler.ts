@@ -1,6 +1,8 @@
 import { Server, WebSocket } from "ws";
 import { PrismaClient } from "@prisma/client";
 
+
+
 interface CustomWebSocket extends WebSocket {
   channelId?: string;
   userId?: string;
@@ -10,18 +12,21 @@ interface CustomWebSocket extends WebSocket {
 const prisma = new PrismaClient();
 const videoPeerIds:{ [key: string]: string } = {};
 
+export const clients:Set<WebSocket> = new Set();
+
 
 export function initializeWebSocketServer(server: any) {
   const wss = new WebSocket.Server({ server });
 
   wss.on("connection", (ws: CustomWebSocket) => {
     console.log("Client connected");
-
     ws.on("message", async (message) => {
       try {
         const parsedMessage = JSON.parse(message.toString());
 
         if (parsedMessage.type === "join-channel") {
+          clients.add(ws);
+          console.log("added");
           ws.channelId = parsedMessage.channelId;
           console.log(`Client joined channel: ${ws.channelId}`);
           return;
@@ -124,6 +129,15 @@ export function initializeWebSocketServer(server: any) {
             videoPeerId:videoPeerId
           }))
           console.log("sended the response-peer-id"+videoPeerId);
+        }
+        if(parsedMessage.type === "incomming-call"){
+          wss.clients.forEach((client) => {
+            const customClient = client as CustomWebSocket;
+            if (customClient.readyState === WebSocket.OPEN && customClient.userId === parsedMessage.targetUserId){
+              console.log(parsedMessage);
+              customClient.send(JSON.stringify(parsedMessage));
+            }
+          });
         }
         
       } catch (error) {

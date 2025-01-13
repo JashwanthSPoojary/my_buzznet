@@ -1,8 +1,9 @@
 import { FaPlus } from "react-icons/fa";
 import { UseWorkspaceContext } from "../context/workspaceContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../util/api";
 import { token } from "../util/authenticated";
+import { useEffect } from "react";
 
 
 interface ServerSidebarProps{
@@ -12,9 +13,10 @@ interface ServerSidebarProps{
 
 
 const ServerSidebar = ({workspaceModalToggle,setworkspaceModalToggle}:ServerSidebarProps) => {
+  const { workspaceId } = useParams();
   const navigate = useNavigate();
   const { workspaces } = UseWorkspaceContext();
-  const { selectedWorkspace } = UseWorkspaceContext();
+  const { selectedWorkspace,setSeletedWorkspace } = UseWorkspaceContext();
 
   const handleSwitchWorkspace = async (id:number) =>{
     try {
@@ -25,6 +27,11 @@ const ServerSidebar = ({workspaceModalToggle,setworkspaceModalToggle}:ServerSide
       console.log(error);
     }
   }
+  useEffect(()=>{
+    if(workspaceId){
+      setSeletedWorkspace(parseInt(workspaceId));
+    }
+  },[workspaceId,setSeletedWorkspace])
   return (
     <div className=" flex w-16 bg-[#23272A] flex-col items-center py-3 space-y-3 overflow-y-auto">
       <button

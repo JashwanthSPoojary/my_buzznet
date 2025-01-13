@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api, isAxios, AxiosErrorResponse } from "../../util/api";
 import { useNavigate, Link } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-
+import { token } from "../../util/authenticated";
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -23,7 +23,23 @@ const SignIn = () => {
         localStorage.setItem("buzznettoken", response.data.token);
       }
       if (response.status === 201) {
-        navigate("/");
+        const firstWorkspaceId = await api.get("/workspace/workspaceIds", {
+          headers: { token: token },
+        });
+        if (!firstWorkspaceId) {
+          throw new Error("not able to get first workspace");
+        }
+        const firstChannelId = await api.get(
+          `/workspace/${firstWorkspaceId.data.data.id}/channel/channelIds`,
+          { headers: { token: token } }
+        );
+        if (!firstChannelId) {
+          throw new Error("not able to get first channel");
+        }
+        navigate(
+          `/workspaces/${firstWorkspaceId.data.data.id}/channels/${firstChannelId.data.data.id}`,
+          { replace: true }
+        );
       }
     } catch (err) {
       if (isAxios(err)) {
@@ -43,11 +59,22 @@ const SignIn = () => {
   return (
     <div className="min-h-screen w-full flex justify-center items-center bg-[#36393f] p-4">
       <div className="w-full max-w-md p-4 sm:p-6 md:p-8 rounded-lg bg-[#2f3136] text-white shadow-lg">
-        <h1 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Welcome back!</h1>
-        {error && <span className="text-[#f04747] text-sm mb-4 block text-center">{error}</span>}
+        <h1 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">
+          Welcome back!
+        </h1>
+        {error && (
+          <span className="text-[#f04747] text-sm mb-4 block text-center">
+            {error}
+          </span>
+        )}
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-xs font-medium text-[#b9bbbe] uppercase mb-2">Email</label>
+            <label
+              htmlFor="email"
+              className="block text-xs font-medium text-[#b9bbbe] uppercase mb-2"
+            >
+              Email
+            </label>
             <input
               id="email"
               type="email"
@@ -58,7 +85,12 @@ const SignIn = () => {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-xs font-medium text-[#b9bbbe] uppercase mb-2">Password</label>
+            <label
+              htmlFor="password"
+              className="block text-xs font-medium text-[#b9bbbe] uppercase mb-2"
+            >
+              Password
+            </label>
             <input
               id="password"
               type="password"
@@ -86,7 +118,7 @@ const SignIn = () => {
           Continue with Google
         </button>
         <p className="mt-6 text-center text-xs sm:text-sm text-[#b9bbbe]">
-          Need an account?{' '}
+          Need an account?{" "}
           <Link to="/signup" className="text-customGreen hover:underline">
             Sign Up
           </Link>

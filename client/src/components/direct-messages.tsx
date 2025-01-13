@@ -4,16 +4,20 @@ import { useFetchDM } from "../hooks/useFetchDM";
 import { UseDMContext } from "../context/dmContext";
 import { UseUserContext } from "../context/userContext";
 import { UseMemberContext } from "../context/memberContext";
-import { FaVideo} from "react-icons/fa";
-import VideoModal from "./videoModal";
-import { useParams } from "react-router-dom";
+import { FaVideo } from "react-icons/fa";
+import { useNavigate, useParams } from "react-router-dom";
+import { UseWorkspaceContext } from "../context/workspaceContext";
+import { useWebSocketContext } from "../context/webSocketContext";
+
 
 interface MessagesProps {
   sidebarToggle: boolean;
 }
 
 const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
-  const {workspaceId, dmId} = useParams();
+  const {selectedWorkspace} = UseWorkspaceContext();
+  const { workspaceId, dmId } = useParams();
+  const { ws } = useWebSocketContext();
   
 
   useFetchDM(
@@ -23,37 +27,45 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
   const [name, setName] = useState<string>("");
   const { messages, setMessages } = UseDMContext();
   const { users } = UseUserContext();
-  const { selectedMember,setSeletedMember } = UseMemberContext();
+  const { selectedMember, setSeletedMember } = UseMemberContext();
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const lastmessageRef = useRef<HTMLDivElement | null>(null);
-  const [isCallActive, setIsCallActive] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const handleVideoCall = async () => {
-    setIsCallActive(!isCallActive);
+    console.log(selectedMember);
+    navigate(`/workspaces/${selectedWorkspace}/dms/${selectedMember}/video`);
   };
   const handleSubmit = (e: React.FormEvent) => {
-
     e.preventDefault();
+    
     if (socket && users?.id && selectedMember && workspaceId && name.trim()) {
+
+      console.log(selectedMember);
+      
       const newMessage = {
         type: "dm",
         content: name,
         userId: users?.id,
         peerId: selectedMember,
         workspaceId: parseInt(workspaceId),
-      };      
+      };
+      console.log(newMessage);
+      
       socket.send(JSON.stringify(newMessage));
       setName("");
     }
   };
 
   useEffect(() => {
-    if(dmId){
+    if (dmId) {
       setSeletedMember(parseInt(dmId));
     }
-    if (!users?.id) return;
-    const ws = new WebSocket("ws://localhost:3000");
-    ws.onopen = () => {
+    if (!users?.id) return;    
+    if(!ws) return;
+    const handleOpen = () => {
+      console.log("dm ws open");
       ws.send(
         JSON.stringify({
           type: "join-dm",
@@ -61,25 +73,26 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
           peerId: selectedMember,
         })
       );
-    };
-    ws.onmessage = (event) => {
-      const newMessage = JSON.parse(event.data);   
-      console.log(newMessage);
-         
+    }
+    if(ws.readyState === WebSocket.OPEN){
+      console.log("hello");
+      
+      handleOpen();
+    }else{
+      ws.addEventListener("open",handleOpen);
+    }
+    const handleMessage = (event: MessageEvent) => {
+      const newMessage = JSON.parse(event.data);
       setMessages((prev) => [...prev, newMessage]);
-    };
-    ws.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
-    ws.onerror = (error) => {
-      console.error("WebSocket error: ", error);
-    };
+
+    }
+    ws.addEventListener("message",handleMessage);
     setSocket(ws);
     return () => {
-      ws.close();
-      console.log("WebSocket closed");
-    };
-  }, [setSeletedMember,dmId,selectedMember, setMessages, users?.id]);
+      ws.removeEventListener("open", handleOpen);
+      ws.removeEventListener("message", handleMessage);
+    }
+  }, [setSeletedMember, dmId, selectedMember, setMessages, users?.id,ws]);
   useEffect(() => {
     if (lastmessageRef.current) {
       lastmessageRef.current.scrollIntoView({ behavior: "smooth" });
@@ -88,9 +101,6 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
 
   return (
     <>
-      {isCallActive ? (
-        <VideoModal setIsCallActive={setIsCallActive} />
-      ) : (
         <div className="bg-[#36393F] flex flex-col flex-1">
           <div
             className={`${
@@ -120,6 +130,7 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
               >
                 <DirectMessage
                   key={message.id}
+                  userId={message.sender_id}
                   author={message.sender.username}
                   content={message.content}
                   timestamp={message.created_at}
@@ -148,7 +159,6 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
             </form>
           </div>
         </div>
-      )}
     </>
   );
 };

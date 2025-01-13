@@ -10,11 +10,13 @@ import { api } from "../util/api";
 import { token } from "../util/authenticated";
 import { useFetchMessages } from "../hooks/useFetchMessage";
 import { useParams } from "react-router-dom";
+import { useWebSocketContext } from "../context/webSocketContext";
 
 interface MessagesProps {
   sidebarToggle: boolean;
 }
 const ChannelMessages = ({ sidebarToggle }: MessagesProps) => {
+const { ws } = useWebSocketContext();
 const {workspaceId, channelId} = useParams();
 
 useFetchMessages(
@@ -26,9 +28,9 @@ useFetchMessages(
   const { messages, setMessages } = UseMessageContext();
   const [name, setName] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
-  const { channels } = UseChannelContext();
+  const { channels,selectedChannel } = UseChannelContext();
   const channelName = channels.find(
-    (channel) => channel.id ===  (channelId ? parseInt(channelId) : 0)
+    (channel) => channel.id ===  selectedChannel
   );
   
   const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -55,10 +57,8 @@ useFetchMessages(
     return fileUrl;
   };
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (socket && channelId && sender && (name.trim() || file)) {
-      console.log("here");
-      
+    e.preventDefault();    
+    if (socket && channelId && sender && (name.trim() || file)) {      
       let fileUrl = null;
       if (file) {
         fileUrl = await uploadFile(file);
@@ -77,6 +77,7 @@ useFetchMessages(
     }
   };
   const handleDelete = (messageId: number) => {
+    console.log(messageId);
     setMessages((prevMessages) =>
       prevMessages.filter((message) => message.id !== messageId)
     );
@@ -88,35 +89,39 @@ useFetchMessages(
   };
 
   useEffect(() => {
-    if (!channelId) return;
+    if(!ws) return;
+    if(!channelId) return;
+    
+              
+      const handleOpen = () => {
+        console.log("channel message ws open");
+        ws.send(
+          JSON.stringify({ type: "join-channel", channelId: parseInt(channelId) })
+        );
+      }      
+      if(ws.readyState === WebSocket.OPEN){        
+        handleOpen();
+      }else{
+        ws.addEventListener("open",handleOpen);
+      }
 
-    const ws = new WebSocket("ws://localhost:3000");
-
-    ws.onopen = () => {
-      console.log("Connected to WebSocket");
-      ws.send(
-        JSON.stringify({ type: "join-channel", channelId: parseInt(channelId) })
-      );
-    };
-
-    ws.onmessage = (event) => {
-      const newMessage = JSON.parse(event.data);
-      setMessages((prev) => [...prev, newMessage]);
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket error: ", error);
-    };
+      const handleMessage = (event: MessageEvent) => {
+        const message = JSON.parse(event.data);
+        if(message.type === "message"){
+          setMessages((prev) => [...prev, message]);
+        }
+        if(message.type === "messageDeleted"){
+          console.log(message);
+           setMessages(messages=>messages.filter(msg=>msg.id !== message.messageId))
+        }
+      }
+      ws.addEventListener("message",handleMessage);    
     setSocket(ws);
     return () => {
-      ws.close();
-      console.log("WebSocket closed");
-    };
-  }, [channelId, setMessages]);
+      ws.removeEventListener("open", handleOpen);
+      ws.removeEventListener("message", handleMessage);
+    }
+  }, [channelId, setMessages,ws]);
   useEffect(() => {
     if (lastmessageRef.current) {
       lastmessageRef.current.scrollIntoView({ behavior: "smooth" });

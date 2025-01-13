@@ -1,18 +1,17 @@
 1. handle all crud operations ( with their bugs ) .
-   a. rename all logic == done
-   b. if workspace deleted redirect to other = done
-   b. make message deletable a user and admin == done
-   c. owner can only create channels .  ==  done
 2. some bugs .
-   a. if no workspace modal open. = done
-   b. general message cant be deleted. = done
-   c. chat-input hide. = 
-   d. deletion will redirect to others. = done
-   e. if not logged login then redirect to invite
-   f. file upload make image disable .  
-   g. routing system
-      a. for workspace 
-         a. 
+   a. chat-input hide. = 
+   b. if not logged login then redirect to invite == 
+   c. routing == done somewhat
+   d. sturture the code = 
+   e. handle navigation = 
+   f. give ai some context = done 
+   g. application should be production level = 
+   h. video call notificaton and working proper = 
+   i. not showing channel name in channel message = 
+   j. real time delete = done
+   l. intial workspace switch error and channel select highlight error =  
+
 3. admin powers .
    a. owner can delete workspace and channel == done
    b. invite can be done by owner = done

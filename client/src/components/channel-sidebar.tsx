@@ -9,10 +9,10 @@ import { UseChannelContext } from "../context/channelContext";
 import { UseWorkspaceContext } from "../context/workspaceContext";
 import { UseUserContext } from "../context/userContext";
 import { UseMemberContext } from "../context/memberContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../util/api";
 import { token } from "../util/authenticated";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface ChannelSidebarProps {
   channelModalToggle: boolean;
@@ -39,6 +39,7 @@ const ChannelSidebar = ({
   setActionModalId,
   setWorkspaceActionToggle,
 }: ChannelSidebarProps) => {
+  const { channelId } = useParams();
 
   const navigate = useNavigate();
   const { members } = UseMemberContext();
@@ -76,6 +77,13 @@ const ChannelSidebar = ({
       console.log(error);
     }
   };
+
+  useEffect(()=>{
+    if(channelId){
+      setSeletedChannel(parseInt(channelId));
+      setSelectedItem({type:"channel",id:parseInt(channelId)});
+    }
+  },[channelId,setSeletedChannel]);
   
 
   return (

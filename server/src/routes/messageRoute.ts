@@ -4,6 +4,8 @@ import { messageSchema } from "../middleware/validationSchema";
 import { PrismaClient } from "@prisma/client";
 import multer from "multer";
 import path from "path";
+import { clients } from "../websocketHandler";
+import { WebSocket } from "ws";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -115,6 +117,13 @@ messageRouter.delete(
       }
       const deletedMessage = await pgClient.channel_message.delete({
         where: { id: messageId },
+      });
+      clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(
+            JSON.stringify({ type: "messageDeleted", messageId: messageId })
+          );
+        }
       });
       if (!deletedMessage) {
         res.status(201).json({ error: "Message not found" });

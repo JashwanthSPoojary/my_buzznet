@@ -2,6 +2,8 @@ import { FaTimes, FaBars, FaRobot } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { UseWorkspaceContext } from "../context/workspaceContext";
 import { UseChannelContext } from "../context/channelContext";
+import { useWebSocketContext } from "../context/webSocketContext";
+import { useEffect } from "react";
 interface ServerSidebarProps {
   sidebarToggle: boolean;
   setSidebartoggle: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,6 +17,7 @@ const Navbar = ({
   setSelectChatbot,
   selectChatbot,
 }: ServerSidebarProps) => {
+  const { ws } = useWebSocketContext();
   const navigate = useNavigate();
   const { selectedWorkspace } = UseWorkspaceContext();
   const { selectedChannel } = UseChannelContext();
@@ -26,45 +29,66 @@ const Navbar = ({
     setSelectChatbot(false);
     navigate(`/workspaces/${selectedWorkspace}/channels/${selectedChannel}`)
   }
+  useEffect(()=>{
+    if(!ws) return;
+    const handelMessage = (event:MessageEvent) => {      
+      const message = JSON.parse(event.data);
+      if(message.type === "incomming-call"){
+        console.log(message);
+      }
+    }
+    ws.addEventListener("message",handelMessage)
+    return ()=>{
+      ws.removeEventListener("message",handelMessage);
+    }
+  },[ws])
   return (
-    <nav className="bg-[#23272A] p-4 flex items-center justify-between">
-      <div className="container flex items-center justify-between">
-        {/* Toggle Sidebar Button */}
+    <nav className="bg-[#23272A] p-3 flex items-center justify-between">
+  <div className="container flex items-center justify-between">
+    {/* Toggle Sidebar Button */}
+    <div
+      onClick={() => setSidebartoggle(!sidebarToggle)}
+      className="text-white focus:outline-none transition-colors duration-200 hover:text-gray-300"
+      aria-label="Toggle navigation"
+    >
+      {selectChatbot ? (
         <div
-          onClick={() => setSidebartoggle(!sidebarToggle)}
+          className="text-white font-semibold text-lg cursor-pointer"
+          onClick={handleSwitchDashboard}
+        >
+          Dashboard
+        </div>
+      ) : (
+        <button
           className="text-white focus:outline-none transition-colors duration-200 hover:text-gray-300"
           aria-label="Toggle navigation"
         >
-          {selectChatbot ? (
-            <div className="text-white font-semibold text-lg cursor-pointer" onClick={handleSwitchDashboard}>Dashboard</div>
+          {sidebarToggle ? (
+            <FaTimes className="h-5 w-5" />
           ) : (
-            <button
-              onClick={() => setSidebartoggle(!sidebarToggle)}
-              className="text-white focus:outline-none transition-colors duration-200 hover:text-gray-300"
-              aria-label="Toggle navigation"
-            >
-              {sidebarToggle ? (
-                <FaTimes className="h-6 w-6" />
-              ) : (
-                <FaBars className="h-6 w-6" />
-              )}
-            </button>
+            <FaBars className="h-5 w-5" />
           )}
-        </div>
+        </button>
+      )}
+    </div>
 
-        {/* Chatbot Section */}
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={handleSwitchChatbot}
-            className="flex items-center text-white focus:outline-none transition-colors duration-200 hover:text-gray-300"
-            aria-label="Open chatbot"
-          >
-            <FaRobot className="h-6 w-6" />
-            <span className="ml-2">Chatbot</span>
-          </button>
-        </div>
-      </div>
-    </nav>
+    {/* Middle Section (Chatbot and Incoming Call) */}
+    <div className="flex items-center space-x-4">
+      {/* Chatbot Button */}
+      <button
+        onClick={handleSwitchChatbot}
+        className="flex items-center text-white focus:outline-none transition-colors duration-200 hover:text-gray-300"
+        aria-label="Open chatbot"
+      >
+        <FaRobot className="h-5 w-5" />
+        <span className="ml-2 text-sm">Chatbot</span>
+      </button>
+
+    </div>
+  </div>
+</nav>
+
+  
   );
 };
 

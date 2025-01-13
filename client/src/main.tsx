@@ -8,26 +8,26 @@ import { MessageProvider } from './context/messageContext.tsx';
 import { UserProvider } from './context/userContext.tsx';
 import { MemberProvider } from './context/memberContext.tsx';
 import { DMProvider } from './context/dmContext.tsx';
-import { VoiceChannelProvider } from './context/voiceChannelContext.tsx';
-import { VoiceConnectionProvider } from './context/voiceConnection.tsx';
+import { WebSocketProvider } from './context/webSocketContext.tsx';
+import { CallProvider } from './context/incommingCall.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
     <WorkspaceProvider>
       <ChannelProvider>
+        <CallProvider>
+        <WebSocketProvider>
         <MessageProvider>
           <UserProvider>
             <MemberProvider>
               <DMProvider>
-                <VoiceChannelProvider>
-                  <VoiceConnectionProvider>
                   <App />
-                  </VoiceConnectionProvider>
-                </VoiceChannelProvider>
               </DMProvider>
             </MemberProvider>
           </UserProvider>
         </MessageProvider>
+        </WebSocketProvider>
+        </CallProvider>
       </ChannelProvider>
     </WorkspaceProvider>
   </BrowserRouter>

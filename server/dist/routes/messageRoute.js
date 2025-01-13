@@ -19,6 +19,8 @@ const validationSchema_1 = require("../middleware/validationSchema");
 const client_1 = require("@prisma/client");
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
+const websocketHandler_1 = require("../websocketHandler");
+const ws_1 = require("ws");
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "uploads/");
@@ -119,6 +121,11 @@ exports.messageRouter.delete("/:channelId/message/:messageId", auth_1.auth, (req
         }
         const deletedMessage = yield pgClient.channel_message.delete({
             where: { id: messageId },
+        });
+        websocketHandler_1.clients.forEach((client) => {
+            if (client.readyState === ws_1.WebSocket.OPEN) {
+                client.send(JSON.stringify({ type: "messageDeleted", messageId: messageId }));
+            }
         });
         if (!deletedMessage) {
             res.status(201).json({ error: "Message not found" });

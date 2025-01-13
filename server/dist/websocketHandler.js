@@ -9,11 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.clients = void 0;
 exports.initializeWebSocketServer = initializeWebSocketServer;
 const ws_1 = require("ws");
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const videoPeerIds = {};
+exports.clients = new Set();
 function initializeWebSocketServer(server) {
     const wss = new ws_1.WebSocket.Server({ server });
     wss.on("connection", (ws) => {
@@ -22,6 +24,8 @@ function initializeWebSocketServer(server) {
             try {
                 const parsedMessage = JSON.parse(message.toString());
                 if (parsedMessage.type === "join-channel") {
+                    exports.clients.add(ws);
+                    console.log("added");
                     ws.channelId = parsedMessage.channelId;
                     console.log(`Client joined channel: ${ws.channelId}`);
                     return;
@@ -101,6 +105,15 @@ function initializeWebSocketServer(server) {
                         videoPeerId: videoPeerId
                     }));
                     console.log("sended the response-peer-id" + videoPeerId);
+                }
+                if (parsedMessage.type === "incomming-call") {
+                    wss.clients.forEach((client) => {
+                        const customClient = client;
+                        if (customClient.readyState === ws_1.WebSocket.OPEN && customClient.userId === parsedMessage.targetUserId) {
+                            console.log(parsedMessage);
+                            customClient.send(JSON.stringify(parsedMessage));
+                        }
+                    });
                 }
             }
             catch (error) {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { UseWorkspaceContext } from "../context/workspaceContext";
-import { api } from "../util/api";
-import { token } from "../util/authenticated";
+import { UseWorkspaceContext } from "../../context/workspaceContext";
+import { api } from "../../util/api";
+import { token } from "../../util/authenticated";
 
 interface WorkspaceActionModalProps {
   workspaceActionToggle: boolean;

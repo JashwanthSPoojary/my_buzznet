@@ -1,7 +1,7 @@
 import { FaClipboard } from "react-icons/fa";
-import { api } from "../util/api";
-import { UseWorkspaceContext } from "../context/workspaceContext";
-import { token } from "../util/authenticated";
+import { api } from "../../util/api";
+import { UseWorkspaceContext } from "../../context/workspaceContext";
+import { token } from "../../util/authenticated";
 import { useState } from "react";
 
 interface ChannelModalProps {

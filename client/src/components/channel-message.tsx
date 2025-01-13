@@ -6,7 +6,7 @@ import { token } from "../util/authenticated";
 import { api } from "../util/api";
 import { UseChannelContext } from "../context/channelContext";
 import { UseUserContext } from "../context/userContext";
-import ImageModal from "./Image-modal";
+import ImageModal from "./modals/Image-modal";
 
 interface MessageProps {
   author: string;
@@ -27,14 +27,11 @@ const ChannelMessage = ({
   authorId,
   file_url,
 }: MessageProps) => {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const { workspaces, selectedWorkspace } = UseWorkspaceContext();
-  const { selectedChannel } = UseChannelContext();
   const { users } = UseUserContext();
-  const currentWorkspace = workspaces.find(
-    (workspace) => workspace.id === selectedWorkspace
-  );
-  const owner = currentWorkspace?.owner.id;
+  const isCurrentUser = authorId === users?.id;
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { selectedWorkspace } = UseWorkspaceContext();
+  const { selectedChannel } = UseChannelContext();
   const url = "http://localhost:3000";
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -60,37 +57,47 @@ const ChannelMessage = ({
   };
 
   return (
-    <div className="flex items-start mb-4 hover:bg-gray-800 p-2 rounded group relative gap-2">
-      <div className="w-10 h-10 rounded-full bg-gray-700 text-white flex items-center justify-center text-lg font-semibold sm:mr-3">
+    <div
+      className={`flex mb-4 p-2 rounded group relative gap-3 ${
+        isCurrentUser ? "flex-row-reverse items-end" : "items-start"
+      } hover:bg-gray-800`}
+    >
+      <div className="w-10 h-10 flex-shrink-0 rounded-full bg-gray-700 text-white flex items-center justify-center text-lg font-semibold">
         {author.charAt(0).toUpperCase()}
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline">
-          <span className="font-bold text-white mr-2 truncate">{author}</span>
-          <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:block">
+      <div
+        className={`flex-1 min-w-0 ${
+          isCurrentUser ? "text-right" : "text-left"
+        }`}
+      >
+        <div className="flex items-baseline justify-between">
+          {!isCurrentUser && (
+            <span className="font-bold text-white truncate">{author}</span>
+          )}
+          <span className="text-xs text-gray-400 sm:ml-2">
             {formatTimestamp(timestamp)}
           </span>
         </div>
         {file_url ? (
           <div
-            className="cursor-pointer mt-3"
+            className="cursor-pointer mt-3 max-w-full sm:max-w-[300px]"
             onClick={() => setSelectedImage(url + file_url)}
           >
             <img
               src={url + file_url}
-              alt="Message image"
-              className="rounded-lg object-cover max-w-full sm:max-w-[300px] max-h-[200px] sm:max-h-[300px]"
+              alt="Message attachment"
+              className="rounded-lg object-cover w-full max-h-[200px] sm:max-h-[300px]"
             />
           </div>
         ) : content ? (
-          <p className="text-gray-300 mt-1 break-words">{content}</p>
+          <p className="text-gray-300 mt-2 break-words">{content}</p>
         ) : null}
       </div>
 
-      {(users?.id === authorId || owner === users?.id) && (
+      {isCurrentUser && (
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <FaTrashAlt
-            className={`text-gray-400  hover:text-red-600 cursor-pointer ${
+            className={`text-gray-400 hover:text-red-600 cursor-pointer ${
               isDeleting ? "text-gray-500 cursor-not-allowed" : ""
             }`}
             onClick={isDeleting ? undefined : handleDelete}

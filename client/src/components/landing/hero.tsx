@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 const Hero = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] bg-gradient-to-b from-[#000000] to-[#0B192C] text-white px-4">
+    <div className="flex flex-col items-center justify-center h-[calc(80vh-4rem)] bg-gradient-to-b from-[#000000] to-[#0B192C] text-white px-4 pt-16">
       <motion.h1
         className="text-6xl md:text-8xl font-extrabold mb-6 text-center leading-tight tracking-wide"
         initial={{ opacity: 0, y: 30 }}
@@ -17,9 +17,7 @@ const Hero = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, delay: 0.4 }}
       >
-        Experience a world of seamless collaboration and powerful functionality.
-        BuzzNet transforms your workspace into a hub of innovation and
-        efficiency, tailored to elevate your team's digital journey.
+        Buzznet is designed as a powerful collaboration platform, enabling users to create and manage workspaces for effective team communication. 
       </motion.p>
       <motion.div
         className="mt-8"

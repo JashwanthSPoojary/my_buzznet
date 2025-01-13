@@ -1,37 +1,40 @@
 import { useState } from "react";
-import { UseChannelContext } from "../context/channelContext";
-import { api } from "../util/api";
-import { token } from "../util/authenticated";
-import { UseWorkspaceContext } from "../context/workspaceContext";
+import { UseChannelContext } from "../../context/channelContext";
+import { api } from "../../util/api";
+import { token } from "../../util/authenticated";
+import { UseWorkspaceContext } from "../../context/workspaceContext";
 
 interface ChannelModalProps {
-    channelModalToggle: boolean;
-    setchannelModalToggle: React.Dispatch<React.SetStateAction<boolean>>;
+  channelModalToggle: boolean;
+  setchannelModalToggle: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ChannelModal = ({channelModalToggle,setchannelModalToggle}:ChannelModalProps) => {
-    const { setChannels } = UseChannelContext();
-    const {selectedWorkspace} = UseWorkspaceContext();
-    const [name, setName] = useState<string>("");
+const ChannelModal = ({
+  channelModalToggle,
+  setchannelModalToggle,
+}: ChannelModalProps) => {
+  const { setChannels } = UseChannelContext();
+  const { selectedWorkspace } = UseWorkspaceContext();
+  const [name, setName] = useState<string>("");
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-          const response = await api.post(
-            `/workspace/${selectedWorkspace}/channel/create`,
-            { name: name },
-            { headers: { token: token } }
-          );
-          setChannels((prev) => [...prev, response.data.data]);
-          setName("")
-          setchannelModalToggle(!channelModalToggle)
-        } catch (error) {
-          console.log("WorkspaceModal error : " + error);
-        }
-      };
-    
-    return ( 
-        <>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await api.post(
+        `/workspace/${selectedWorkspace}/channel/create`,
+        { name: name },
+        { headers: { token: token } }
+      );
+      setChannels((prev) => [...prev, response.data.data]);
+      setName("");
+      setchannelModalToggle(!channelModalToggle);
+    } catch (error) {
+      console.log("WorkspaceModal error : " + error);
+    }
+  };
+
+  return (
+    <>
       {channelModalToggle && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50">
           <div
@@ -70,9 +73,7 @@ const ChannelModal = ({channelModalToggle,setchannelModalToggle}:ChannelModalPro
                 <div className="flex justify-end space-x-3">
                   <button
                     type="button"
-                    onClick={() =>
-                      setchannelModalToggle(!channelModalToggle)
-                    }
+                    onClick={() => setchannelModalToggle(!channelModalToggle)}
                     className="px-4 py-2 text-sm font-medium text-[#dcddde] bg-transparent hover:underline focus:outline-none focus:ring-2 focus:ring-[#3ba55c] focus:ring-offset-2 focus:ring-offset-[#36393f]"
                   >
                     Cancel
@@ -90,7 +91,7 @@ const ChannelModal = ({channelModalToggle,setchannelModalToggle}:ChannelModalPro
         </div>
       )}
     </>
-     );
-}
- 
+  );
+};
+
 export default ChannelModal;
