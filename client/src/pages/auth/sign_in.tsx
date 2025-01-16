@@ -3,6 +3,7 @@ import { api, isAxios, AxiosErrorResponse } from "../../util/api";
 import { useNavigate, Link } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { token } from "../../util/authenticated";
+import env from "../../util/config";
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -54,11 +55,11 @@ const SignIn = () => {
     }
   };
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/user/google";
+    window.location.href = `${env.backend_url}/user/google`;
   };
   return (
-    <div className="min-h-screen w-full flex justify-center items-center bg-[#36393f] p-4">
-      <div className="w-full max-w-md p-4 sm:p-6 md:p-8 rounded-lg bg-[#2f3136] text-white shadow-lg">
+    <div className="min-h-screen w-full flex justify-center items-center bg-gradient-to-b from-[#000000] to-[#0B192C] p-4">
+      <div className="w-full max-w-md p-4 sm:p-6 md:p-8 rounded-lg bg-[#1E2A38] text-white shadow-lg">
         <h1 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">
           Welcome back!
         </h1>
@@ -81,7 +82,7 @@ const SignIn = () => {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 rounded bg-[#202225] border-none text-white placeholder-[#72767d] focus:outline-none focus:ring-2 focus:ring-[#5865f2]"
+              className="w-full px-3 py-2 rounded bg-[#16222E] border-none text-white placeholder-[#72767d] focus:outline-none focus:ring-2 focus:ring-[#5865f2]"
             />
           </div>
           <div>
@@ -97,12 +98,12 @@ const SignIn = () => {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded bg-[#202225] border-none text-white placeholder-[#72767d] focus:outline-none focus:ring-2 focus:ring-[#5865f2]"
+              className="w-full px-3 py-2 rounded bg-[#16222E] border-none text-white placeholder-[#72767d] focus:outline-none focus:ring-2 focus:ring-[#5865f2]"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-customGreen hover:bg-green-800 text-white py-2 px-4 rounded transition-colors duration-200"
+            className="w-full bg-[#5CB338] hover:bg-[#4AA12C] text-white py-2 px-4 rounded transition-colors duration-200"
           >
             Sign In
           </button>
@@ -119,7 +120,7 @@ const SignIn = () => {
         </button>
         <p className="mt-6 text-center text-xs sm:text-sm text-[#b9bbbe]">
           Need an account?{" "}
-          <Link to="/signup" className="text-customGreen hover:underline">
+          <Link to="/signup" className="text-[#5CB338] hover:underline">
             Sign Up
           </Link>
         </p>

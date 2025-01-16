@@ -2,18 +2,18 @@ import { FaRobot } from "react-icons/fa";
 
 const ChatbotHero = () => {
   return (
-    <div className="bg-gradient-to-r from-[#36393F] to-[#36393F] text-white p-6 border-b border-gray-700 mb-3">
+    <div className="bg-gradient-to-r bg-[#0B192C] text-white p-6 border-b border-gray-700 mb-3">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
         <div className="flex items-center space-x-3 mb-4 sm:mb-0">
-          <div className="bg-gray-700 rounded-full p-2">
-            <FaRobot className="text-blue-400 text-2xl sm:text-xl" />
+          <div className="bg-[#0B192C] rounded-full p-2">
+            <FaRobot className="bg-[#0B192C] text-2xl sm:text-xl" />
           </div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight hover:text-blue-400 transition duration-300">
             Chatbot
           </h1>
         </div>
 
-        <div className="flex items-center space-x-2 bg-gray-700 rounded-full px-4 py-2">
+        <div className="flex items-center space-x-2 bg-[#0B192C] rounded-full px-4 py-2">
           <span className="text-sm font-medium text-center">
             AI-Powered Assistance
           </span>

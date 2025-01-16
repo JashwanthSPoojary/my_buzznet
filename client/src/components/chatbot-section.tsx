@@ -46,7 +46,7 @@ const ChatbotSection = ({setChatbot}:ChatbotSectionProps) => {
     
   }, [messages,setChatbot]);
   return (
-    <div className="flex flex-1 overflow-hidden bg-[#36393F] flex-col">
+    <div className="flex flex-1 overflow-hidden bg-[#0B192C] flex-col">
       <div className="flex-1"></div>
       <div className="overflow-y-auto px-4 sm:block scrollbar-hide">
         <ChatbotHero />
@@ -62,7 +62,7 @@ const ChatbotSection = ({setChatbot}:ChatbotSectionProps) => {
           <ChatbotMessage content="Typing..." author="chatbot" /> 
         )}
       </div>
-      <div className="bg-[#36393F] p-4 sm:block sticky bottom-0">
+      <div className="bg-[#0B192C] p-4 sm:block sticky bottom-0">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <div className="relative flex-grow">
             <input
@@ -70,7 +70,7 @@ const ChatbotSection = ({setChatbot}:ChatbotSectionProps) => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type a message..."
-              className="w-full bg-[#4c505a] text-white rounded-md px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-600"
+              className="w-full bg-[#0B192C] text-white rounded-md px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-600"
             />
           </div>
           <button

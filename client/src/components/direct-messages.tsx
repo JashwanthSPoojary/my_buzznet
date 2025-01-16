@@ -35,7 +35,7 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
 
   const handleVideoCall = async () => {
     console.log(selectedMember);
-    navigate(`/workspaces/${selectedWorkspace}/dms/${selectedMember}/video`);
+    navigate(`/workspaces/${selectedWorkspace}/dms/${selectedMember}/video/${selectedMember}`);
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,20 +101,20 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
 
   return (
     <>
-        <div className="bg-[#36393F] flex flex-col flex-1">
+        <div className="bg-[#0B192C] flex flex-col flex-1">
           <div
             className={`${
               sidebarToggle ? "hidden" : ""
             } flex-1 overflow-y-auto px-4 sm:block scrollbar-hide`}
           >
             {/* Video Section */}
-            <div className="sticky top-0 bg-[#2F3136] flex items-center justify-between p-4 shadow-md z-10">
-              <h2 className="text-white font-semibold text-lg">
+            <div className="sticky top-0 bg-[#0B192C] flex items-center justify-between p-4 shadow-md z-10">
+              <h2 className="text-white font-semibold text-lg font-heading">
                 Direct Message
               </h2>
               <div className="flex items-center gap-3">
                 <button
-                  className="bg-[#4c505a] text-white p-2 rounded-full hover:bg-green-600 transition duration-200"
+                  className="bg-[#0B192C] text-white p-2 rounded-full hover:bg-green-600 transition duration-200"
                   onClick={handleVideoCall}
                 >
                   <FaVideo className="w-5 h-5" />
@@ -143,7 +143,7 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
           <div
             className={`${
               sidebarToggle ? "hidden" : ""
-            } bg-[#36393F] p-4 sm:block sticky bottom-0`}
+            } bg-[#0B192C] p-4 sm:block sticky bottom-0`}
           >
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
               <input
@@ -151,9 +151,9 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Type a message..."
-                className="flex-grow bg-[#4c505a] text-white rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="flex-grow bg-[#0B192C] text-white rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-600"
               />
-              <button className="bg-customGreen text-white rounded-md px-4 py-2 font-semibold hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-600">
+              <button className="bg-customGreen text-white rounded-md px-4 py-2 font-semibold hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-600 font-sans">
                 Send
               </button>
             </form>

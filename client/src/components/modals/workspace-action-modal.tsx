@@ -70,7 +70,7 @@ const WorkspaceActionModal = ({
     <>
       {workspaceActionToggle && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#36393f] rounded-lg shadow-xl w-full max-w-md">
+          <div className="bg-[#0c2344] rounded-lg shadow-xl w-full max-w-md">
             <div className="p-4 border-b border-gray-700">
               <h2 className="text-white text-lg font-semibold">
                 {action === "delete" ? "Delete Item" : "Rename Item"}
@@ -87,12 +87,12 @@ const WorkspaceActionModal = ({
                   type="text"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="w-full bg-[#40444b] text-white border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-[#192e4a] text-white border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
                   placeholder="Enter new name"
                 />
               )}
             </div>
-            <div className="flex justify-end p-4 bg-[#2f3136] rounded-b-lg">
+            <div className="flex justify-end p-4 bg-[#0c2344] rounded-b-lg">
               <button
                 onClick={() => setWorkspaceActionToggle(!workspaceActionToggle)}
                 className="px-4 py-2 text-sm font-medium text-white hover:underline"

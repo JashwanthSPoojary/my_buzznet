@@ -6,17 +6,17 @@ interface ChannelHeroProps {
 
 const ChannelHero = ({ channelName }: ChannelHeroProps) => {
   return (
-    <div className="bg-gradient-to-r from-[#36393F] to-[#36393F] text-white p-6 border-b border-gray-700">
+    <div className="bg-gradient-to-r bg-[#0B192C] text-white p-6 border-b border-gray-700">
       <div className="flex items-center justify-between flex-wrap">
         <div className="flex items-center space-x-3">
-          <div className="bg-gray-700 rounded-full p-2">
+          <div className="bg-[#0B192C] rounded-full p-2">
             <FaHashtag className="text-green-400 text-xl" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-xl md:text-2xl hover:text-green-400 transition duration-300">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-xl md:text-2xl hover:text-green-400 transition duration-300 font-heading">
             {channelName}
           </h1>
         </div>
-        <div className="flex items-center space-x-2 bg-gray-700 rounded-full px-4 py-2 mt-3 sm:mt-0">
+        <div className="flex items-center space-x-2 bg-[#0B192C] rounded-full px-4 py-2 mt-3 sm:mt-0">
           <FaUserFriends className="text-green-400 text-lg" />
           <span className="text-sm font-medium">All members</span>
         </div>

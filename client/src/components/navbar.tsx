@@ -2,8 +2,6 @@ import { FaTimes, FaBars, FaRobot } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { UseWorkspaceContext } from "../context/workspaceContext";
 import { UseChannelContext } from "../context/channelContext";
-import { useWebSocketContext } from "../context/webSocketContext";
-import { useEffect } from "react";
 interface ServerSidebarProps {
   sidebarToggle: boolean;
   setSidebartoggle: React.Dispatch<React.SetStateAction<boolean>>;
@@ -17,7 +15,6 @@ const Navbar = ({
   setSelectChatbot,
   selectChatbot,
 }: ServerSidebarProps) => {
-  const { ws } = useWebSocketContext();
   const navigate = useNavigate();
   const { selectedWorkspace } = UseWorkspaceContext();
   const { selectedChannel } = UseChannelContext();
@@ -29,21 +26,8 @@ const Navbar = ({
     setSelectChatbot(false);
     navigate(`/workspaces/${selectedWorkspace}/channels/${selectedChannel}`)
   }
-  useEffect(()=>{
-    if(!ws) return;
-    const handelMessage = (event:MessageEvent) => {      
-      const message = JSON.parse(event.data);
-      if(message.type === "incomming-call"){
-        console.log(message);
-      }
-    }
-    ws.addEventListener("message",handelMessage)
-    return ()=>{
-      ws.removeEventListener("message",handelMessage);
-    }
-  },[ws])
   return (
-    <nav className="bg-[#23272A] p-3 flex items-center justify-between">
+    <nav className="bg-[#0B192C] p-3 flex items-center justify-between">
   <div className="container flex items-center justify-between">
     {/* Toggle Sidebar Button */}
     <div

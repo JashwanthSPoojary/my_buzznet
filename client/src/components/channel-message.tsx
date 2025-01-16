@@ -7,6 +7,7 @@ import { api } from "../util/api";
 import { UseChannelContext } from "../context/channelContext";
 import { UseUserContext } from "../context/userContext";
 import ImageModal from "./modals/Image-modal";
+import env from "../util/config";
 
 interface MessageProps {
   author: string;
@@ -32,7 +33,7 @@ const ChannelMessage = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const { selectedWorkspace } = UseWorkspaceContext();
   const { selectedChannel } = UseChannelContext();
-  const url = "http://localhost:3000";
+  const url = env.backend_url;
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const handleDelete = async () => {
@@ -62,7 +63,7 @@ const ChannelMessage = ({
         isCurrentUser ? "flex-row-reverse items-end" : "items-start"
       } hover:bg-gray-800`}
     >
-      <div className="w-10 h-10 flex-shrink-0 rounded-full bg-gray-700 text-white flex items-center justify-center text-lg font-semibold">
+      <div className="w-10 h-10 flex-shrink-0 rounded-full bg-[#3c3a73] text-white flex items-center justify-center text-lg font-semibold">
         {author.charAt(0).toUpperCase()}
       </div>
       <div
@@ -72,7 +73,7 @@ const ChannelMessage = ({
       >
         <div className="flex items-baseline justify-between">
           {!isCurrentUser && (
-            <span className="font-bold text-white truncate">{author}</span>
+            <span className="font-bold text-white truncate font-heading">{author}</span>
           )}
           <span className="text-xs text-gray-400 sm:ml-2">
             {formatTimestamp(timestamp)}
@@ -90,7 +91,7 @@ const ChannelMessage = ({
             />
           </div>
         ) : content ? (
-          <p className="text-gray-300 mt-2 break-words">{content}</p>
+          <p className="text-gray-300 mt-2 break-words font-sans">{content}</p>
         ) : null}
       </div>
 

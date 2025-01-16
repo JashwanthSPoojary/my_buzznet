@@ -1,47 +1,48 @@
 import { FaBriefcase, FaUsers, FaRegCommentDots, FaEnvelope, FaVideo, FaDesktop } from 'react-icons/fa';
 
 const features = [
-    {
-      icon: FaBriefcase,
-      title: "Workspace Creation",
-      description: "Create and customize your team workspace with powerful organization tools"
-    },
-    {
-      icon: FaUsers,
-      title: "Channel Creation",
-      description: "Organize conversations by topics, projects, or teams with dedicated channels"
-    },
-    {
-      icon: FaRegCommentDots,
-      title: "Group Chats",
-      description: "Collaborate seamlessly with team members in real-time group discussions"
-    },
-    {
-      icon: FaEnvelope,
-      title: "Direct Messages",
-      description: "Private, secure one-on-one conversations with team members"
-    },
-    {
-      icon: FaVideo,
-      title: "Video Calling",
-      description: "Crystal-clear video conferences with screen sharing capabilities"
-    },
-    {
-      icon: FaDesktop,
-      title: "AI Assistance",
-      description: "Smart assistance powered by AI to boost your productivity"
-    }
-  ]
+  {
+    icon: FaBriefcase,
+    title: "Workspace Creation",
+    description: "Easily set up and manage workspaces to bring your team together."
+  },
+  {
+    icon: FaUsers,
+    title: "Channel Creation",
+    description: "Organize discussions with channels tailored to topics or teams."
+  },
+  {
+    icon: FaRegCommentDots,
+    title: "Group Chats",
+    description: "Stay connected with your team through real-time group chats."
+  },
+  {
+    icon: FaEnvelope,
+    title: "Direct Messages",
+    description: "Communicate privately with team members, one-on-one."
+  },
+  {
+    icon: FaVideo,
+    title: "Video Calling",
+    description: "Host video calls to connect and collaborate with your team."
+  },
+  {
+    icon: FaDesktop,
+    title: "AI Assistance",
+    description: "Leverage AI tools to streamline your workflow and productivity."
+  }
+];
+
 const Feature = () => {
     return ( 
         <section className="bg-gradient-to-b from-[#0B192C] to-[#000000]  py-20 px-4 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-[#4CAF50] text-4xl md:text-5xl font-bold mb-4">
-            Powerful Features
+          <h2 className="text-[#4CAF50] text-4xl md:text-5xl font-bold mb-4 font-heading">
+            Features 
           </h2>
-          <p className="text-gray-300 text-xl md:text-2xl max-w-3xl mx-auto">
-            Experience next-level team collaboration with our comprehensive suite of features
+          <p className="text-gray-300 text-xl md:text-2xl max-w-3xl mx-auto font-sans">
+            This are some of the features that i was able to build in the time . My thought out some essential features . 
           </p>
         </div>
 
@@ -59,10 +60,10 @@ const Feature = () => {
                   <feature.icon className="h-8 w-8 text-[#4CAF50]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-white text-xl font-semibold mb-2">
+                  <h3 className="text-white text-xl font-semibold mb-2 font-heading">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-400 leading-relaxed">
+                  <p className="text-gray-400 leading-relaxed font-sans">
                     {feature.description}
                   </p>
                 </div>

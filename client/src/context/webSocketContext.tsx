@@ -14,6 +14,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const [ws,setWs] = useState<WebSocket|null>(null)
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:3000");
+    
     socket.onclose = () => {
       console.log("WebSocket disconnected");
     };

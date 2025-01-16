@@ -7,7 +7,7 @@ import Dashboard from "./pages/home/dashboard";
 import InvitePage from "./pages/invite/invite-page";
 import LandingPage from "./pages/Landing/landing-page";
 
-const App = () => {
+const App = () => {  
   return (
     <>
       <Routes>

@@ -6,6 +6,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily:{
+        sans: ['Poppins', 'sans-serif'],
+        heading: ['Inter', 'sans-serif'],
+      },
       colors: {
         customGreen: '#2e8b49',
       },

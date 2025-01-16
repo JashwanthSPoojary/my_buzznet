@@ -1,4 +1,5 @@
 import axios,{AxiosError} from "axios";
+import env from "./config";
 
 export interface AxiosErrorResponse {
     error?:string
@@ -6,7 +7,7 @@ export interface AxiosErrorResponse {
 const isAxios = axios.isAxiosError;
 const api = axios.create({
     //change to env
-    baseURL:"http://localhost:3000",
+    baseURL:env.backend_url,
     headers:{
         "Content-Type":"application/json"
     }

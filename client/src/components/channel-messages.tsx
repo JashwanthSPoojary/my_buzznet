@@ -132,7 +132,7 @@ useFetchMessages(
 
 
   return (
-    <div className="bg-[#36393F] flex flex-col flex-1">
+    <div className="bg-[#0B192C] flex flex-col flex-1">
       <div className="flex-1"></div>
       <div
         className={`${
@@ -164,7 +164,7 @@ useFetchMessages(
       <div
         className={`${
           sidebarToggle ? "hidden" : ""
-        } bg-[#36393F] p-4 sm:block sticky bottom-0`}
+        } bg-[#0B192C] p-4 sm:block sticky bottom-0`}
       >
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <div className="relative flex-grow">
@@ -173,7 +173,7 @@ useFetchMessages(
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Type a message..."
-              className="w-full bg-[#4c505a] text-white rounded-md px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-600"
+              className="w-full bg-[#0B192C] text-white rounded-md px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-600"
             />
             <button
               type="button"
