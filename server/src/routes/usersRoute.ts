@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { PrismaClient, Prisma } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../utils/config";
+import { FRONTEND_URL, JWT_SECRET } from "../utils/config";
 import passport from "passport";
 import { signinSchema,signupSchema } from "../middleware/validationSchema";
 import { auth,CustomRequest } from "../middleware/auth";
@@ -111,11 +111,10 @@ userRouter.get(
   async (req: Request, res: Response) => {
     const token = req.user?.token;
     if(!token){
-      res.redirect(`http://localhost:5173/signin`)
+      res.redirect(`${FRONTEND_URL}/signin`)
     }else{
-      res.redirect(`http://localhost:5173/google/callback?token=${token}`)
+      res.redirect(`${FRONTEND_URL}/google/callback?token=${token}`)
     }
-    
   }
 );
 userRouter.get('/userdetails',auth, async (req:CustomRequest,res)=>{

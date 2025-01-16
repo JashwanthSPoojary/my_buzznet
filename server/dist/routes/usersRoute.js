@@ -117,10 +117,10 @@ userRouter.get("/google/callback", passport_1.default.authenticate("google", { s
     var _a;
     const token = (_a = req.user) === null || _a === void 0 ? void 0 : _a.token;
     if (!token) {
-        res.redirect(`http://localhost:5173/signin`);
+        res.redirect(`${config_1.FRONTEND_URL}/signin`);
     }
     else {
-        res.redirect(`http://localhost:5173/google/callback?token=${token}`);
+        res.redirect(`${config_1.FRONTEND_URL}/google/callback?token=${token}`);
     }
 }));
 userRouter.get('/userdetails', auth_1.auth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {

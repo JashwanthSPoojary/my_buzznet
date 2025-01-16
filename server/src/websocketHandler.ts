@@ -31,12 +31,15 @@ export function initializeWebSocketServer(server: any) {
           console.log(`Client joined channel: ${ws.channelId}`);
           return;
         }
-
         if (parsedMessage.type === "join-dm") {
           ws.userId = parsedMessage.userId;
           ws.peerId = parsedMessage.peerId;
           console.log(`User ${ws.userId} joined DM with ${ws.peerId}`);
           return;
+        }
+        if(parsedMessage.type === "join-video"){
+          videoPeerIds[parsedMessage.videoUserId] = parsedMessage.videoPeerId;
+          console.log("video call joined by"+parsedMessage.videoPeerId);
         }
 
         if (parsedMessage.type === "message" && ws.channelId) {
@@ -76,7 +79,6 @@ export function initializeWebSocketServer(server: any) {
           });
           return;
         }
-
         if (parsedMessage.type === "dm" && ws.userId && ws.peerId) {
           const savedMessage = await prisma.direct_messages.create({
             data: {
@@ -117,10 +119,6 @@ export function initializeWebSocketServer(server: any) {
             }
           });
           return;
-        }
-        if(parsedMessage.type === "join-video"){
-          videoPeerIds[parsedMessage.videoUserId] = parsedMessage.videoPeerId;
-          console.log("video call joined by"+parsedMessage.videoPeerId);
         }
         if(parsedMessage.type === "request-peer-id"){
           const videoPeerId = videoPeerIds[parsedMessage.targetVideoUserId];
