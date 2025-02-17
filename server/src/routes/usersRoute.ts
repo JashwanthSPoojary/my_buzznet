@@ -2,13 +2,206 @@ import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { PrismaClient, Prisma } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { FRONTEND_URL, JWT_SECRET } from "../utils/config";
-import passport from "passport";
-import { signinSchema,signupSchema } from "../middleware/validationSchema";
+import { APP_PASSWORD, EMAIL_USER, FRONTEND_URL, JWT_SECRET } from "../utils/config";
+import passport, { use } from "passport";
+import { signinSchema,signupEmailSchema,signupSchema, verifyOtp } from "../middleware/validationSchema";
 import { auth,CustomRequest } from "../middleware/auth";
+import { escape } from "querystring";
+import nodemailer from 'nodemailer';
+
 
 const userRouter = Router();
 const pgClient = new PrismaClient();
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: EMAIL_USER,
+    pass: APP_PASSWORD  // Gmail App Password
+  }
+});
+
+async function sendOTP(email:string, otp:string) {
+  const mailOptions = {
+    from: EMAIL_USER,
+    to: email,
+    subject: 'Verify Your Email',
+    html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Email Verification</h2>
+      <p>Your verification code is:</p>
+      <h1 style="color: #4CAF50; font-size: 32px;">${otp}</h1>
+      <p>This code will expire in 10 minutes.</p>
+    </div>
+  `
+  };
+  transporter.sendMail(mailOptions);
+}
+
+function generateOTP() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+userRouter.post('/verify-otp', async (req, res) => {
+  const validateSchema = verifyOtp.safeParse(req.body);
+  if (!validateSchema.success) {
+    res.status(202).json({
+      error: validateSchema.error.errors[0].message,
+    });
+    return
+  };
+  const { email, otp } = req.body;
+  try {
+    const verification = await pgClient.emailVerification.findFirst({
+      where:{
+        email:email,
+        otp:otp,
+        expires_at:{
+          gt:new Date(),
+        }
+      }
+    })
+    if (!verification) {
+      res.status(202).json({
+        error: "Invalid or expired OTP"
+      });
+      return 
+    }
+
+    await pgClient.users.create({
+      data:{
+        email:email,
+        email_verified:true
+      }
+    });
+    await pgClient.emailVerification.delete({
+      where: { email }
+    });
+    res.status(200).json({
+      message: "Email verified successfully"
+    });
+  } catch (error) {
+    console.log(error);
+  }
+})
+
+userRouter.post("/signupemail", async (req, res) => {
+  const validateSchema = signupEmailSchema.safeParse(req.body);
+  console.log(validateSchema);
+  
+  if (!validateSchema.success) {
+    res.status(202).json({
+      error: validateSchema.error.errors[0].message,
+    });
+    return;
+  };
+  const { email } = req.body;
+  try {
+    const otp = generateOTP();
+    const expireTime = new Date(Date.now()+10*60*1000);
+
+
+    const response =await  pgClient.users.findFirst({
+      where:{
+        email:email
+      }
+    })
+    console.log(response);
+    
+    if(response) {
+      console.log(response);
+      res.status(202).json({
+        error:"user already exists"
+      });
+      return
+    }
+    await pgClient.emailVerification.upsert({
+      where:{email},
+      update:{
+        email:email,
+        otp:otp,
+        expires_at:expireTime
+      },
+      create:{
+        email:email,
+        otp:otp,
+        expires_at:expireTime
+      }
+    });
+
+    await sendOTP(email,otp);
+    res.status(200).json({
+      message: "OTP sent successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to send OTP"
+    });
+    console.log(error);
+    
+  }
+
+});
+userRouter.post("/signupusername", async (req, res) => {
+  const username = req.body.username;
+  const email = req.body.email;
+  const password = req.body.password;
+  console.log(password);
+  
+  const password_hash = await bcrypt.hash(password, 5);
+  try {
+    const workspace = await pgClient.users.update({
+      where:{
+        email:email
+      },
+      data:{
+        username:username,
+        password_hash:password_hash
+      }
+    });
+    if(!workspace){
+      res.status(202).json({
+        error:"Failed to signup"
+      })
+    }
+    res.status(200).json({
+      message:"signed up"
+    })
+  } catch (error) {
+    console.log(error);
+  }
+});
+userRouter.post("/checkemail", async (req, res) => {
+  const email = req.body.email;
+  try {
+    const workspace = await pgClient.users.findFirst({
+      where:{
+        email:email
+      },
+      select:{
+        id:true,
+        username:true,
+      }
+    });
+    if(workspace?.username){
+      res.status(202).json({
+        error:"no email id"
+      })
+      return
+    }
+    if(!workspace){
+      res.status(202).json({
+        error:"no email id"
+      })
+      return
+    }
+    res.status(200).json({
+      message:"valid email"
+    })
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 userRouter.post("/signup", async (req, res) => {
   const validateSchema = signupSchema.safeParse(req.body);
@@ -75,7 +268,7 @@ userRouter.post("/signin", async (req, res) => {
     }
     const password_hash = response?.password_hash;
     const user_id = response?.id;
-    if (password_hash === undefined) return;
+    if (password_hash === null) return;
     const validPassword = await bcrypt.compare(password, password_hash);
     if (!validPassword) {
       res.status(400).json({
@@ -111,12 +304,13 @@ userRouter.get(
   async (req: Request, res: Response) => {
     const token = req.user?.token;
     if(!token){
-      res.redirect(`${FRONTEND_URL}/signin`)
+      res.redirect(`${FRONTEND_URL}/error`)
     }else{
       res.redirect(`${FRONTEND_URL}/google/callback?token=${token}`)
     }
   }
 );
+
 userRouter.get('/userdetails',auth, async (req:CustomRequest,res)=>{
   const userId = req.user_id;
   

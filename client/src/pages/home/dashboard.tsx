@@ -18,8 +18,6 @@ import { useFetchUser } from "../../hooks/useFetchUser";
 import { useFetchChannels } from "../../hooks/useFetchChannel";
 import { UseChannelContext } from "../../context/channelContext";
 import { useFetchMembers } from "../../hooks/useFetchMember";
-import CallNotification from "../../components/callNotification";
-import VideoModal from "../../components/modals/videoModal";
 
 const Dashboard = () => {
   useFetchUser();
@@ -66,7 +64,7 @@ const Dashboard = () => {
   return (
     <div className="w-screen h-screen flex flex-col overflow-hidden">
       {/* notification */}
-      <CallNotification/>
+      {/* <CallNotification/> */}
       {/* Modals */}
       <Logout logoutToggle={logoutToggle} setLogoutToggle={setLogoutToggle} />
       <ChannelModal
@@ -133,9 +131,9 @@ const Dashboard = () => {
             path="dms/:dmId/"
             element={<DirectMessages sidebarToggle={sidebarToggle} />}
           />
-          <Route
+          {/* <Route
           path="dms/:dmId/video/:callerId"
-          element={<VideoModal sidebarToggle={sidebarToggle}/>}/>
+          element={}/> */}
         </Routes>
       </div>
     </div>

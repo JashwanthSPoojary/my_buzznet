@@ -6,5 +6,5 @@ export const createPeerInstance =  (userId?: string) => {
     throw new Error("User ID is required to create a Peer instance.");
   }
     
-  return  new Peer(userId+"");
+  return  new Peer(userId);
 };

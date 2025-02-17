@@ -9,23 +9,20 @@ import { UserProvider } from "./context/userContext.tsx";
 import { MemberProvider } from "./context/memberContext.tsx";
 import { DMProvider } from "./context/dmContext.tsx";
 import { WebSocketProvider } from "./context/webSocketContext.tsx";
-import { CallProvider } from "./context/incommingCall.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <UserProvider>
       <WorkspaceProvider>
         <ChannelProvider>
-        <WebSocketProvider>
-          <CallProvider>
-              <MessageProvider>
-                <MemberProvider>
-                  <DMProvider>
+          <WebSocketProvider>
+            <MessageProvider>
+              <MemberProvider>
+                <DMProvider>
                     <App />
-                  </DMProvider>
-                </MemberProvider>
-              </MessageProvider>
-          </CallProvider>
+                </DMProvider>
+              </MemberProvider>
+            </MessageProvider>
           </WebSocketProvider>
         </ChannelProvider>
       </WorkspaceProvider>

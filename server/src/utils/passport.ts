@@ -46,7 +46,7 @@ passport.use(
         );
         return done(null, { token });
       } catch (error) {
-        return done(error);
+        return done(null,{error:"Database error"});
       }
     }
   )

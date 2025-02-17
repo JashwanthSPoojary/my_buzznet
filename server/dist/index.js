@@ -18,7 +18,9 @@ const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
 app.use("/uploads", express_1.default.static(path_1.default.join(__dirname, "..", "uploads")));
 app.use(express_1.default.json());
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: "http://localhost:5173"
+}));
 app.use(passport_1.default.initialize());
 app.use("/user", usersRoute_1.userRouter);
 app.use("/workspace", workspaceRoute_1.workspaceRouter);

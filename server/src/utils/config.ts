@@ -8,6 +8,8 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string
 const CALLBACK_URL = process.env.CALLBACK_URL
 const SESSION_KEY = process.env.SESSION_KEY as any
 const FRONTEND_URL = process.env.FRONTEND_URL
+const APP_PASSWORD  = process.env.APP_PASSWORD;
+const EMAIL_USER = process.env.EMAIL_USER;
 
 
 export {
@@ -17,7 +19,9 @@ export {
     GOOGLE_CLIENT_SECRET,
     CALLBACK_URL,
     SESSION_KEY,
-    FRONTEND_URL
+    FRONTEND_URL,
+    APP_PASSWORD,
+    EMAIL_USER
 }
 
 

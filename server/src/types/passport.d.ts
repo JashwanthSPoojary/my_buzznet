@@ -3,6 +3,7 @@ declare global {
       // Extend the existing User interface
       interface User {
         token?: string;
+        error?:string
       }
     }
   }

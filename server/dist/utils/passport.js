@@ -49,6 +49,6 @@ passport_1.default.use(new passport_google_oauth20_1.Strategy({
         return done(null, { token });
     }
     catch (error) {
-        return done(error);
+        return done(null, { error: "Database error" });
     }
 })));

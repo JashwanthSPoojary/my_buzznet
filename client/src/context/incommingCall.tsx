@@ -40,30 +40,24 @@ export const CallProvider = ({ children }: CallProviderType) => {
   const [isInCall, setIsInCall] = useState(false);
   const peerRef = useRef<ReturnType<typeof createPeerInstance> | null>(null);
   const navigate = useNavigate();
-  const { users } = UseUserContext();
   const { selectedWorkspace } = UseWorkspaceContext();
   const [showIncomingCall, setShowIncomingCall] = useState(false);
   const { ws } = useWebSocketContext();
+  const { users } = UseUserContext();
 
   useEffect(() => {
-    console.log("incomming");
-    
-    console.log(users?.id);
-    console.log(ws);
-    
-    
     if (users?.id && ws) {
-      console.log("enter");
-      console.log(users.id, "");
-      
-      peerRef.current = createPeerInstance(users.id.toString());
+      const generateCallerId = String(
+        Math.floor(Math.random() * 10000000)
+      ).padStart(7, "0");
+      peerRef.current = createPeerInstance(generateCallerId);
       const peer = peerRef.current;
       console.log(peer);
-      
+
       peer.on("open", (id: string) => {
         console.log("Connected with PeerJS ID:", id);
         console.log("sending join video");
-        
+
         ws.send(
           JSON.stringify({
             type: "join-video",
@@ -71,32 +65,31 @@ export const CallProvider = ({ children }: CallProviderType) => {
             videoUserId: users.id,
           })
         );
-        });
-        peer.on("call", (call) => {
-            console.log("call is here");
-            
-            setIncomingCall(call);
-            setShowIncomingCall(true);
-            setCallerId(call.peer)
-        });
-        peer.on("error", (err) => {
-          console.error("PeerJS Error:", err);
-        });
-       
-        
-        
-        return () => {
-            peer.destroy();
-            ws.close();
-        };
+      });
+      peer.on("call", (call) => {
+        console.log("call is here");
+
+        setIncomingCall(call);
+        setShowIncomingCall(true);
+        setCallerId(call.peer);
+      });
+      peer.on("error", (err) => {
+        console.error("PeerJS Error:", err);
+      });
+
+      return () => {
+        peer.destroy();
+        ws.close();
+      };
     }
-  }, [users?.id,ws]);
+  }, [users?.id, ws]);
 
   const acceptIncomingCall = () => {
     setShowIncomingCall(false);
     setIsInCall(true);
     // Navigate to video call page
-    navigate(`/workspaces/${selectedWorkspace}/dms/${callerId}/video/${callerId}`);
+    navigate(`/workspaces/${selectedWorkspace}/dms/${callerId}/videoModal`);
+
   };
   const rejectIncomingCall = () => {
     setShowIncomingCall(false);
@@ -105,8 +98,9 @@ export const CallProvider = ({ children }: CallProviderType) => {
   };
 
   return (
-    <CallContext.Provider value={{ 
-        incomingCall, 
+    <CallContext.Provider
+      value={{
+        incomingCall,
         setIncomingCall,
         callerId,
         setCallerId,
@@ -115,7 +109,9 @@ export const CallProvider = ({ children }: CallProviderType) => {
         peerInstance: peerRef.current,
         showIncomingCall,
         acceptIncomingCall,
-        rejectIncomingCall, }}>
+        rejectIncomingCall,
+      }}
+    >
       {children}
     </CallContext.Provider>
   );

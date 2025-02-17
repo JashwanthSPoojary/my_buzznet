@@ -39,7 +39,7 @@ const ChannelModal = ({
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50">
           <div
             ref={() => {}}
-            className="bg-[#0c2344] rounded-md shadow-xl w-full max-w-md"
+            className="bg-[#0a192f] rounded-md shadow-xl w-full max-w-md"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
@@ -65,7 +65,7 @@ const ChannelModal = ({
                     id="channel-name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#202225] border border-[#040405] rounded text-[#dcddde] placeholder-[#72767d] focus:outline-none focus:ring-2 focus:ring-[#3ba55c] focus:border-transparent"
+                    className="w-full px-3 py-2 bg-[#192e4a] border border-[#040405] rounded text-[#dcddde] placeholder-[#72767d] focus:outline-none focus:ring-2 focus:ring-[#3ba55c] focus:border-transparent"
                     placeholder="Enter channel name"
                     required
                   />

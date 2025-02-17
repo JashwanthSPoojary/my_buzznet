@@ -21,9 +21,194 @@ const config_1 = require("../utils/config");
 const passport_1 = __importDefault(require("passport"));
 const validationSchema_1 = require("../middleware/validationSchema");
 const auth_1 = require("../middleware/auth");
+const nodemailer_1 = __importDefault(require("nodemailer"));
 const userRouter = (0, express_1.Router)();
 exports.userRouter = userRouter;
 const pgClient = new client_1.PrismaClient();
+const transporter = nodemailer_1.default.createTransport({
+    service: 'gmail',
+    auth: {
+        user: config_1.EMAIL_USER,
+        pass: config_1.APP_PASSWORD // Gmail App Password
+    }
+});
+function sendOTP(email, otp) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const mailOptions = {
+            from: config_1.EMAIL_USER,
+            to: email,
+            subject: 'Verify Your Email',
+            html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Email Verification</h2>
+      <p>Your verification code is:</p>
+      <h1 style="color: #4CAF50; font-size: 32px;">${otp}</h1>
+      <p>This code will expire in 10 minutes.</p>
+    </div>
+  `
+        };
+        transporter.sendMail(mailOptions);
+    });
+}
+function generateOTP() {
+    return String(Math.floor(100000 + Math.random() * 900000));
+}
+userRouter.post('/verify-otp', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const validateSchema = validationSchema_1.verifyOtp.safeParse(req.body);
+    if (!validateSchema.success) {
+        res.status(202).json({
+            error: validateSchema.error.errors[0].message,
+        });
+        return;
+    }
+    ;
+    const { email, otp } = req.body;
+    try {
+        const verification = yield pgClient.emailVerification.findFirst({
+            where: {
+                email: email,
+                otp: otp,
+                expires_at: {
+                    gt: new Date(),
+                }
+            }
+        });
+        if (!verification) {
+            res.status(202).json({
+                error: "Invalid or expired OTP"
+            });
+            return;
+        }
+        yield pgClient.users.create({
+            data: {
+                email: email,
+                email_verified: true
+            }
+        });
+        yield pgClient.emailVerification.delete({
+            where: { email }
+        });
+        res.status(200).json({
+            message: "Email verified successfully"
+        });
+    }
+    catch (error) {
+        console.log(error);
+    }
+}));
+userRouter.post("/signupemail", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const validateSchema = validationSchema_1.signupEmailSchema.safeParse(req.body);
+    console.log(validateSchema);
+    if (!validateSchema.success) {
+        res.status(202).json({
+            error: validateSchema.error.errors[0].message,
+        });
+        return;
+    }
+    ;
+    const { email } = req.body;
+    try {
+        const otp = generateOTP();
+        const expireTime = new Date(Date.now() + 10 * 60 * 1000);
+        const response = yield pgClient.users.findFirst({
+            where: {
+                email: email
+            }
+        });
+        console.log(response);
+        if (response) {
+            console.log(response);
+            res.status(202).json({
+                error: "user already exists"
+            });
+            return;
+        }
+        yield pgClient.emailVerification.upsert({
+            where: { email },
+            update: {
+                email: email,
+                otp: otp,
+                expires_at: expireTime
+            },
+            create: {
+                email: email,
+                otp: otp,
+                expires_at: expireTime
+            }
+        });
+        yield sendOTP(email, otp);
+        res.status(200).json({
+            message: "OTP sent successfully"
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            error: "Failed to send OTP"
+        });
+        console.log(error);
+    }
+}));
+userRouter.post("/signupusername", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const username = req.body.username;
+    const email = req.body.email;
+    const password = req.body.password;
+    console.log(password);
+    const password_hash = yield bcrypt_1.default.hash(password, 5);
+    try {
+        const workspace = yield pgClient.users.update({
+            where: {
+                email: email
+            },
+            data: {
+                username: username,
+                password_hash: password_hash
+            }
+        });
+        if (!workspace) {
+            res.status(202).json({
+                error: "Failed to signup"
+            });
+        }
+        res.status(200).json({
+            message: "signed up"
+        });
+    }
+    catch (error) {
+        console.log(error);
+    }
+}));
+userRouter.post("/checkemail", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const email = req.body.email;
+    try {
+        const workspace = yield pgClient.users.findFirst({
+            where: {
+                email: email
+            },
+            select: {
+                id: true,
+                username: true,
+            }
+        });
+        if (workspace === null || workspace === void 0 ? void 0 : workspace.username) {
+            res.status(202).json({
+                error: "no email id"
+            });
+            return;
+        }
+        if (!workspace) {
+            res.status(202).json({
+                error: "no email id"
+            });
+            return;
+        }
+        res.status(200).json({
+            message: "valid email"
+        });
+    }
+    catch (error) {
+        console.log(error);
+    }
+}));
 userRouter.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
     const validateSchema = validationSchema_1.signupSchema.safeParse(req.body);
@@ -87,7 +272,7 @@ userRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, funct
         }
         const password_hash = response === null || response === void 0 ? void 0 : response.password_hash;
         const user_id = response === null || response === void 0 ? void 0 : response.id;
-        if (password_hash === undefined)
+        if (password_hash === null)
             return;
         const validPassword = yield bcrypt_1.default.compare(password, password_hash);
         if (!validPassword) {
@@ -117,7 +302,7 @@ userRouter.get("/google/callback", passport_1.default.authenticate("google", { s
     var _a;
     const token = (_a = req.user) === null || _a === void 0 ? void 0 : _a.token;
     if (!token) {
-        res.redirect(`${config_1.FRONTEND_URL}/signin`);
+        res.redirect(`${config_1.FRONTEND_URL}/error`);
     }
     else {
         res.redirect(`${config_1.FRONTEND_URL}/google/callback?token=${token}`);

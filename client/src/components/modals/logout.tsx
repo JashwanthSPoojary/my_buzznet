@@ -6,16 +6,16 @@ interface LogoutProps {
 }
 
 const Logout = ({ logoutToggle, setLogoutToggle }: LogoutProps) => {
-    const navigate = useNavigate();
-    const handleSubmit = () => {
-        localStorage.removeItem("buzznettoken");
-        navigate('/signin');
-    }
+  const navigate = useNavigate();
+  const handleSubmit = () => {
+    localStorage.removeItem("buzznettoken");
+    navigate("/signin");
+  };
   return (
     <>
       {logoutToggle && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-[#36393f] rounded-lg shadow-xl w-full max-w-md">
+          <div className="bg-[#0a192f] rounded-lg shadow-xl w-full max-w-md">
             <div className="p-4 border-b border-gray-700">
               <h2 className="text-white text-lg font-semibold">Log Out</h2>
               <button
@@ -44,7 +44,7 @@ const Logout = ({ logoutToggle, setLogoutToggle }: LogoutProps) => {
               <div className="flex justify-end space-x-3">
                 <button
                   onClick={() => setLogoutToggle(!logoutToggle)}
-                  className="bg-[#2f3136] hover:bg-[#36393f] text-white font-medium py-2 px-4 rounded transition duration-200"
+                  className="bg-[#0a192f] hover:bg-[#36393f] text-white font-medium py-2 px-4 rounded transition duration-200"
                 >
                   Cancel
                 </button>

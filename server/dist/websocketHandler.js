@@ -15,7 +15,122 @@ const ws_1 = require("ws");
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const videoPeerIds = {};
+function getKeyByValue(obj, value) {
+    return Object.keys(obj).find((key) => obj[key] === value);
+}
 exports.clients = new Set();
+const MessageHandlers = [
+    {
+        type: "join-channel",
+        handler: (ws, message) => __awaiter(void 0, void 0, void 0, function* () {
+            exports.clients.add(ws);
+            ws.channelId = message.channelId;
+            console.log(`Client joined channel: ${ws.channelId}`);
+        })
+    },
+    {
+        type: "join-dm",
+        handler: (ws, message) => __awaiter(void 0, void 0, void 0, function* () {
+            ws.userId = message.userId;
+            ws.peerId = message.peerId;
+            console.log(`User ${ws.userId} joined DM with ${ws.peerId}`);
+        })
+    },
+    {
+        type: "join-video",
+        handler: (ws, message) => __awaiter(void 0, void 0, void 0, function* () {
+            videoPeerIds[message.videoUserId] = message.videoPeerId;
+            console.log("Video call joined by " + message.videoPeerId);
+        }),
+    }, {
+        type: "message",
+        handler: (ws, message, wss) => __awaiter(void 0, void 0, void 0, function* () {
+            if (!ws.channelId)
+                return;
+            const savedMessage = yield prisma.channel_message.create({
+                data: {
+                    channel_id: message.channelId,
+                    content: message.content,
+                    sender_id: message.userId,
+                    file_url: message.file || null,
+                },
+            });
+            const sender = yield prisma.users.findUnique({
+                where: { id: message.userId },
+                select: { username: true },
+            });
+            if (!sender) {
+                console.error("Sender not found");
+                return;
+            }
+            const enrichedMessage = Object.assign(Object.assign({}, savedMessage), { sender: { id: message.userId, username: sender.username }, type: "message" });
+            broadcastToChannel(wss, ws.channelId, enrichedMessage);
+        })
+    }, {
+        type: "dm",
+        handler: (ws, message, wss) => __awaiter(void 0, void 0, void 0, function* () {
+            if (!ws.userId || !ws.peerId)
+                return;
+            const savedMessage = yield prisma.direct_messages.create({
+                data: {
+                    sender_id: parseInt(ws.userId),
+                    receiver_id: parseInt(ws.peerId),
+                    content: message.content,
+                    workspace_id: parseInt(message.workspaceId),
+                    file_url: message.file || null,
+                },
+            });
+            const sender = yield prisma.users.findUnique({
+                where: { id: message.userId },
+                select: { username: true },
+            });
+            if (!sender) {
+                console.error("Sender not found");
+                return;
+            }
+            const enrichedMessage = Object.assign(Object.assign({}, savedMessage), { sender: { id: message.userId, username: sender.username }, type: "dm" });
+            broadcastToDM(wss, ws.userId, ws.peerId, enrichedMessage);
+        }),
+    }, {
+        type: "request-peer-id",
+        handler: (ws, message) => __awaiter(void 0, void 0, void 0, function* () {
+            const videoPeerId = videoPeerIds[message.targetVideoUserId];
+            ws.send(JSON.stringify({
+                type: "response-peer-id",
+                videoPeerId: videoPeerId
+            }));
+            console.log("Sent the response-peer-id " + videoPeerId);
+        })
+    }, {
+        type: "incomming-call",
+        handler: (ws, message, wss) => __awaiter(void 0, void 0, void 0, function* () {
+            broadcastToUser(wss, message.targetUserId, message);
+        })
+    }
+];
+function broadcastToChannel(wss, channelId, message) {
+    wss.clients.forEach((client) => {
+        if (client.readyState === ws_1.WebSocket.OPEN && client.channelId === channelId) {
+            client.send(JSON.stringify(message));
+        }
+    });
+}
+function broadcastToDM(wss, userId, peerId, message) {
+    wss.clients.forEach((client) => {
+        if (client.readyState === ws_1.WebSocket.OPEN &&
+            ((client.userId === peerId && client.peerId === userId) ||
+                (client.userId === userId && client.peerId === peerId))) {
+            client.send(JSON.stringify(message));
+        }
+    });
+}
+function broadcastToUser(wss, targetUserId, message) {
+    wss.clients.forEach((client) => {
+        if (client.readyState === ws_1.WebSocket.OPEN && client.userId === targetUserId) {
+            client.send(JSON.stringify(message));
+        }
+    });
+}
 function initializeWebSocketServer(server) {
     const wss = new ws_1.WebSocket.Server({ server });
     wss.on("connection", (ws) => {
@@ -23,97 +138,9 @@ function initializeWebSocketServer(server) {
         ws.on("message", (message) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const parsedMessage = JSON.parse(message.toString());
-                if (parsedMessage.type === "join-channel") {
-                    exports.clients.add(ws);
-                    console.log("added");
-                    ws.channelId = parsedMessage.channelId;
-                    console.log(`Client joined channel: ${ws.channelId}`);
-                    return;
-                }
-                if (parsedMessage.type === "join-dm") {
-                    ws.userId = parsedMessage.userId;
-                    ws.peerId = parsedMessage.peerId;
-                    console.log(`User ${ws.userId} joined DM with ${ws.peerId}`);
-                    return;
-                }
-                if (parsedMessage.type === "join-video") {
-                    videoPeerIds[parsedMessage.videoUserId] = parsedMessage.videoPeerId;
-                    console.log("video call joined by" + parsedMessage.videoPeerId);
-                }
-                if (parsedMessage.type === "message" && ws.channelId) {
-                    const savedMessage = yield prisma.channel_message.create({
-                        data: {
-                            channel_id: parsedMessage.channelId,
-                            content: parsedMessage.content,
-                            sender_id: parsedMessage.userId,
-                            file_url: parsedMessage.file || null,
-                        },
-                    });
-                    const sender = yield prisma.users.findUnique({
-                        where: { id: parsedMessage.userId },
-                        select: { username: true },
-                    });
-                    if (!sender) {
-                        console.error("Sender not found");
-                        return;
-                    }
-                    const enrichedMessage = Object.assign(Object.assign({}, savedMessage), { sender: { id: parsedMessage.userId, username: sender.username }, type: "message" });
-                    wss.clients.forEach((client) => {
-                        const customClient = client;
-                        if (customClient.readyState === ws_1.WebSocket.OPEN &&
-                            customClient.channelId === ws.channelId) {
-                            customClient.send(JSON.stringify(enrichedMessage));
-                        }
-                    });
-                    return;
-                }
-                if (parsedMessage.type === "dm" && ws.userId && ws.peerId) {
-                    const savedMessage = yield prisma.direct_messages.create({
-                        data: {
-                            sender_id: parseInt(ws.userId),
-                            receiver_id: parseInt(ws.peerId),
-                            content: parsedMessage.content,
-                            workspace_id: parseInt(parsedMessage.workspaceId),
-                            file_url: parsedMessage.file || null,
-                        },
-                    });
-                    const sender = yield prisma.users.findUnique({
-                        where: { id: parsedMessage.userId },
-                        select: { username: true },
-                    });
-                    if (!sender) {
-                        console.error("Sender not found");
-                        return;
-                    }
-                    const enrichedMessage = Object.assign(Object.assign({}, savedMessage), { sender: { id: parsedMessage.userId, username: sender.username }, type: "dm" });
-                    wss.clients.forEach((client) => {
-                        const customClient = client;
-                        if (customClient.readyState === ws_1.WebSocket.OPEN &&
-                            ((customClient.userId === ws.peerId &&
-                                customClient.peerId === ws.userId) ||
-                                (customClient.userId === ws.userId &&
-                                    customClient.peerId === ws.peerId))) {
-                            customClient.send(JSON.stringify(enrichedMessage));
-                        }
-                    });
-                    return;
-                }
-                if (parsedMessage.type === "request-peer-id") {
-                    const videoPeerId = videoPeerIds[parsedMessage.targetVideoUserId];
-                    ws.send(JSON.stringify({
-                        type: "response-peer-id",
-                        videoPeerId: videoPeerId
-                    }));
-                    console.log("sended the response-peer-id" + videoPeerId);
-                }
-                if (parsedMessage.type === "incomming-call") {
-                    wss.clients.forEach((client) => {
-                        const customClient = client;
-                        if (customClient.readyState === ws_1.WebSocket.OPEN && customClient.userId === parsedMessage.targetUserId) {
-                            console.log(parsedMessage);
-                            customClient.send(JSON.stringify(parsedMessage));
-                        }
-                    });
+                const handler = MessageHandlers.find(h => h.type === parsedMessage.type);
+                if (handler) {
+                    handler === null || handler === void 0 ? void 0 : handler.handler(ws, parsedMessage, wss);
                 }
             }
             catch (error) {
@@ -123,6 +150,7 @@ function initializeWebSocketServer(server) {
         }));
         ws.on("close", () => {
             console.log("Client disconnected");
+            exports.clients.delete(ws);
         });
     });
 }

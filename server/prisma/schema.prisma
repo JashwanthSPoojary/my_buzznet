@@ -9,10 +9,11 @@ datasource db {
 
 model users {
   id               Int                 @id @default(autoincrement())
-  username         String              @unique
+  username         String?              
   email            String?             @unique
-  password_hash    String
+  password_hash    String?
   created_at       DateTime            @default(now())
+  email_verified  Boolean  @default(false)
   workspace_owner  workspaces[]
   channel_messages channel_message[]
   workspace_member workspace_members[]
@@ -99,4 +100,12 @@ model VoiceChannel {
   members       users[]   @relation("VoiceChannelMembers")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model EmailVerification {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  otp        String
+  expires_at DateTime
+  created_at DateTime @default(now())
 }

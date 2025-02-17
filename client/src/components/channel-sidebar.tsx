@@ -45,7 +45,6 @@ const ChannelSidebar = ({
   const { members } = UseMemberContext();
   const { channels,selectedChannel,setSeletedChannel } = UseChannelContext();
   const { workspaces,selectedWorkspace } = UseWorkspaceContext();
-  console.log(selectedChannel);
   const [selectedItem,setSelectedItem] = useState<{type:"member"|"channel",id:number|undefined}>({ type: "channel", id: selectedChannel }); 
   const workspace = workspaces.find(
     (workspace) => workspace.id === selectedWorkspace

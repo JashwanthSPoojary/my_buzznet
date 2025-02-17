@@ -18,8 +18,6 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
   const {selectedWorkspace} = UseWorkspaceContext();
   const { workspaceId, dmId } = useParams();
   const { ws } = useWebSocketContext();
-  
-
   useFetchDM(
     workspaceId ? parseInt(workspaceId) : 0,
     dmId ? parseInt(dmId) : 0
@@ -35,7 +33,8 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
 
   const handleVideoCall = async () => {
     console.log(selectedMember);
-    navigate(`/workspaces/${selectedWorkspace}/dms/${selectedMember}/video/${selectedMember}`);
+    const generateCallerId = String(Math.floor(Math.random()*10000000)).padStart(7,'0');
+    navigate(`/workspaces/${selectedWorkspace}/dms/${selectedMember}/video/${generateCallerId}`);
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +56,6 @@ const DirectMessages = ({ sidebarToggle }: MessagesProps) => {
       setName("");
     }
   };
-
   useEffect(() => {
     if (dmId) {
       setSeletedMember(parseInt(dmId));

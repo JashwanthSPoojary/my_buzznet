@@ -70,7 +70,7 @@ const WorkspaceActionModal = ({
     <>
       {workspaceActionToggle && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#0c2344] rounded-lg shadow-xl w-full max-w-md">
+          <div className="bg-[#0a192f] rounded-lg shadow-xl w-full max-w-md">
             <div className="p-4 border-b border-gray-700">
               <h2 className="text-white text-lg font-semibold">
                 {action === "delete" ? "Delete Item" : "Rename Item"}
@@ -92,7 +92,7 @@ const WorkspaceActionModal = ({
                 />
               )}
             </div>
-            <div className="flex justify-end p-4 bg-[#0c2344] rounded-b-lg">
+            <div className="flex justify-end p-4 bg-[#0a192f] rounded-b-lg">
               <button
                 onClick={() => setWorkspaceActionToggle(!workspaceActionToggle)}
                 className="px-4 py-2 text-sm font-medium text-white hover:underline"
