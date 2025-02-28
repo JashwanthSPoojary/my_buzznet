@@ -1,17 +1,17 @@
-1. some bugs .
-   a. chat-input hide. =
-   b. if not logged login then redirect to invite ==
-   d. sturture the code =
-   e. handle navigation =
-   g. application should be production level =
-   h. video call notificaton and working proper =
-   i. not showing channel name in channel message =
-   l. intial workspace switch error and channel select highlight error =  
-   m. create voice chat
-   n. make video modal work
-4. loading and toast ( errors section ) .
-7. progressive app .
-9. voice and video call . 
-10. as saas application .
-11. threads .
-13. image analysis in chatabot .
+Buzznet : Real time communication platform 
+A community social media application application like slack or discord built this project to learn full stack skills has group chat , dms , ai assistant chatbot , file uploading , video call and much more . 
+Features  : 
+1. AI assistant chatbot ( ask queries about buzznet )
+2. Group chatting
+3. DIrect messages between members of workspace
+4. video calling betweem peer to peer 
+Tech stack:=
+frontend : react js , zustasnd state management library , tailwind css ,  axios , react toastify , framer mothion , react icons 
+backend : Node js , Express js , jwt , prisma , multer , bcrypt , ws , node mailer , passport js  , peer js , zod , @google/generative-ai , passport-google-oauth20
+database : postgres SQL with prisma 
+deployment : AWS ec2 for backend and databse , Vercel for frontend . 
+other : docker 
+I built this project initial on the phase of learning full stack developemnt .
+not fully functionally has lot of issues and bugs to fix 
+
+Live demo : buzznet.jashwanth.me
