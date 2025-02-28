@@ -1,17 +1,45 @@
-Buzznet : Real time communication platform 
-A community social media application application like slack or discord built this project to learn full stack skills has group chat , dms , ai assistant chatbot , file uploading , video call and much more . 
-Features  : 
-1. AI assistant chatbot ( ask queries about buzznet )
-2. Group chatting
-3. DIrect messages between members of workspace
-4. video calling betweem peer to peer 
-Tech stack:=
-frontend : react js , zustasnd state management library , tailwind css ,  axios , react toastify , framer mothion , react icons 
-backend : Node js , Express js , jwt , prisma , multer , bcrypt , ws , node mailer , passport js  , peer js , zod , @google/generative-ai , passport-google-oauth20
-database : postgres SQL with prisma 
-deployment : AWS ec2 for backend and databse , Vercel for frontend . 
-other : docker 
-I built this project initial on the phase of learning full stack developemnt .
-not fully functionally has lot of issues and bugs to fix 
+# **Buzznet: A Real-Time Communication Platform**  
 
-Live demo : buzznet.jashwanth.me
+Buzznet is a **community-driven social media application** inspired by Slack and Discord. This project was built to **learn full-stack development** while implementing features like **group chat, direct messaging, AI-powered chatbot, file uploads, video calls, and more**.  
+
+### **🚀 Features**  
+✅ **AI Assistant Chatbot** – Ask queries related to Buzznet.  
+✅ **Group Chatting** – Seamless real-time conversations.  
+✅ **Direct Messages** – Private messaging between workspace members.  
+✅ **Video Calling** – Peer-to-peer video communication.  
+✅ **Image Sharing** – Upload and share images easily.  
+
+### **🛠️ Tech Stack**  
+#### **Frontend:**  
+- **React.js** – Component-based UI  
+- **Zustand** – State management  
+- **Tailwind CSS** – Styling  
+- **Axios** – API requests  
+- **React Toastify** – Notifications  
+- **Framer Motion** – Animations  
+- **React Icons** – Icons  
+
+#### **Backend:**  
+- **Node.js** + **Express.js** – REST API  
+- **Prisma** – Database ORM  
+- **PostgreSQL** – Relational database  
+- **JWT** – Authentication  
+- **Multer** – File uploads  
+- **Bcrypt** – Password hashing  
+- **WebSockets (ws)** – Real-time communication  
+- **Peer.js** – WebRTC for video calling  
+- **Zod** – Input validation  
+- **Nodemailer** – Email handling  
+- **Passport.js + Google OAuth** – Authentication  
+- **@google/generative-ai** – AI chatbot integration  
+
+#### **Deployment:**  
+- **Backend + Database** – AWS EC2  
+- **Frontend** – Vercel  
+- **Containerization** – Docker  
+
+### **🚧 Status**  
+This project is still in development and **not fully functional yet**. There are known **bugs and issues** that need to be fixed.  
+
+### **🌐 Live Demo**  
+🔗 [buzznet.jashwanth.me](https://buzznet.jashwanth.me)  
